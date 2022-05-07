@@ -13,18 +13,14 @@ import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-
 import java.awt.Component;
-
 import javax.imageio.ImageIO;
 import javax.swing.Box;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
 import javax.swing.JLabel;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 
 public class MainFrame extends JFrame {
@@ -39,6 +35,7 @@ public class MainFrame extends JFrame {
 			public void run() {
 				try {
 					MainFrame frame = new MainFrame();
+					//LoginFrame lframe=new LoginFrame("p");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -56,7 +53,7 @@ public class MainFrame extends JFrame {
 		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(MainFrame.class.getResource("/icons/icon.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 518, 468);
+		setBounds(100, 100, 518, 450);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -80,11 +77,11 @@ public class MainFrame extends JFrame {
 		pnlChild.add(verticalStrut);
 		
 		JButton btnPersonalAeroport = new JButton("Personal aeroport");
-		JFrame thisFrame=this;
+		
 		btnPersonalAeroport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				LoginFrame login=new LoginFrame("p");
-				thisFrame.setVisible(false);
+				LoginFrame login=new LoginFrame(" - Personal Aeroport");
+				dispose();
 			}
 		});
 		btnPersonalAeroport.setAlignmentX(CENTER_ALIGNMENT);
@@ -95,6 +92,12 @@ public class MainFrame extends JFrame {
 		pnlChild.add(verticalStrut_1);
 		
 		JButton btnCompanieAeriana = new JButton("Companie aeriana");
+		btnCompanieAeriana.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				LoginFrame login = new LoginFrame(" - Companie Aeriana");
+				dispose();
+			}
+		});
 		btnCompanieAeriana.setAlignmentX(CENTER_ALIGNMENT);
 		pnlChild.add(btnCompanieAeriana);
 		
