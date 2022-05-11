@@ -1,4 +1,4 @@
-package Interfaces;
+package interfaces;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -6,6 +6,9 @@ import java.awt.Component;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import interfaces.BazaDeDate;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -108,7 +111,7 @@ public class LoginFrame extends JFrame {
 		});
 		if (tipUtilizator.indexOf("Personal Aeroport") != -1) {
 			System.out.println("Ha!");
-			bdPersonal = new BazaDeDate("jdbc:mysql://localhost:3306/proiect_fis", "root", "root");
+			bdPersonal = new BazaDeDate("jdbc:mysql://localhost:3306/pj", "root", "root");
 			bdPersonal.conectare();
 			bdpDeschisa=true;
 			try {
