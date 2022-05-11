@@ -1,23 +1,24 @@
-package firstpackage;
+package classes;
 
 import java.util.Calendar;
+import java.util.Date;
 
 public class ZiOperare {
-	private Calendar data;
-	private Integer locuriRamaseB;
-	private Integer locuriRamaseA;
+	private Date data;
+	private int locuriRamaseB;
+	private int locuriRamaseA;
 	
-	public ZiOperare(Calendar data, Integer locuriRamaseB, Integer locuriRamaseA) {
+	public ZiOperare(Date data, int locuriRamaseB, int locuriRamaseA) {
 		this.data = data;
 		this.locuriRamaseB = locuriRamaseB;
 		this.locuriRamaseA = locuriRamaseA;
 	}
 
-	public Calendar getData() {
+	public Date getData() {
 		return data;
 	}
 
-	public void setData(Calendar data) {
+	public void setData(Date data) {
 		this.data = data;
 	}
 
@@ -29,7 +30,7 @@ public class ZiOperare {
 		this.locuriRamaseB = locuriRamaseB;
 	}
 
-	public Integer getLocuriRamaseA() {
+	public int getLocuriRamaseA() {
 		return locuriRamaseA;
 	}
 

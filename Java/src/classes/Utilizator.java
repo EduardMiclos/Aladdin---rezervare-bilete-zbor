@@ -1,4 +1,6 @@
-package firstpackage;
+package classes;
+
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 public abstract class Utilizator {
 	private float pretBilet;
@@ -8,7 +10,7 @@ public abstract class Utilizator {
 	private String telefon;
 	private Integer varsta;
 	
-	public Utilizator(float pretBilet, String nume, String prenume, String email, String telefon, Integer varsta) {
+	public Utilizator(Pair <Integer, Integer> locuriDorite, float pretBilet, String nume, String prenume, String email, String telefon, Integer varsta) {
 		this.pretBilet = pretBilet;
 		this.nume = nume;
 		this.prenume = prenume;
@@ -60,7 +62,7 @@ public abstract class Utilizator {
 				+ ", telefon=" + telefon + ", varsta=" + varsta + "]";
 	}
 	
-	public abstract float calculPret(LocDorit[] locuriDorite, Cursa cursa, Boolean dusIntors);
+	public abstract float calculPret(Cursa cursa, Boolean dusIntors);
 	public abstract void cautaCurse();
 	public abstract void efectuarePlata();
 	

@@ -27,7 +27,7 @@ public class MainFrame extends JFrame {
 	/* Second JPanel, containing the buttons. */
 	private JPanel pnlButtons;
 	
-	private static String applicationTitle = "Aladdin - Rezerva usor bilete de zbor";
+	private static String frameTitle = "Aladdin - Rezerva usor bilete de zbor";
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -58,7 +58,7 @@ public class MainFrame extends JFrame {
 	public MainFrame() throws IOException {
 		setVisible(true);
 		setResizable(false);
-		setTitle(applicationTitle);
+		setTitle(frameTitle);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(MainFrame.class.getResource("/icons/icon.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 518, 450);

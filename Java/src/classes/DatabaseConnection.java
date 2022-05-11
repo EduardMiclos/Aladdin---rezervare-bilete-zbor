@@ -1,8 +1,8 @@
-package interfaces;
+package classes;
 
 import java.sql.*;
 
-public class BazaDeDate {
+public class DatabaseConnection {
 	private String url;
 	private Statement sql;
 	public ResultSet rs;
@@ -11,7 +11,7 @@ public class BazaDeDate {
 	private String username;
 	private String password;
 
-	public BazaDeDate(String url, String username, String password) {
+	public DatabaseConnection(String url, String username, String password) {
 		this.url = url;
 		this.username = username;
 		this.password = password;
@@ -21,7 +21,7 @@ public class BazaDeDate {
 		this.con = null;
 	}
 
-	public void conectare() {
+	public void connect() {
 		try {
 			this.con = DriverManager.getConnection(this.url, username, password);
 			this.sql = this.con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
@@ -31,7 +31,7 @@ public class BazaDeDate {
 		}
 	}
 
-	public void deconectare() {
+	public void disconnect() {
 		try {
 			this.con.close();
 		} catch (SQLException e) {
@@ -39,11 +39,11 @@ public class BazaDeDate {
 		}
 	}
 
-	public void citireDate(String interogare) throws SQLException{
-		this.rs = this.sql.executeQuery(interogare);
+	public void sendQuery(String query) throws SQLException{
+		this.rs = this.sql.executeQuery(query);
 	}
 
-	public int dimensiuneTabela() throws SQLException {		
+	public int tableSize() throws SQLException {		
 		this.rs.beforeFirst();
 		int indexPrim = this.rs.getRow();
 		this.rs.last();

@@ -1,13 +1,13 @@
-package firstpackage;
+package classes;
 
 import java.util.Calendar;
 
 public class NodTraseu {
 	private String numeAeroport;
-	private Calendar oraPlecare;
-	private Calendar oraSosire;
+	private String oraPlecare;
+	private String oraSosire;
 	
-	public NodTraseu(String numeAeroport, Calendar oraPlecare, Calendar oraSosire) {
+	public NodTraseu(String numeAeroport, String oraPlecare, String oraSosire) {
 		this.numeAeroport = numeAeroport;
 		this.oraPlecare = oraPlecare;
 		this.oraSosire = oraSosire;
@@ -21,19 +21,19 @@ public class NodTraseu {
 		this.numeAeroport = numeAeroport;
 	}
 
-	public Calendar getOraPlecare() {
+	public String getOraPlecare() {
 		return oraPlecare;
 	}
 
-	public void setOraPlecare(Calendar oraPlecare) {
+	public void setOraPlecare(String oraPlecare) {
 		this.oraPlecare = oraPlecare;
 	}
 
-	public Calendar getOraSosire() {
+	public String getOraSosire() {
 		return oraSosire;
 	}
 
-	public void setOraSosire(Calendar oraSosire) {
+	public void setOraSosire(String oraSosire) {
 		this.oraSosire = oraSosire;
 	}
 

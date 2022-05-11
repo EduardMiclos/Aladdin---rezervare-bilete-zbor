@@ -1,19 +1,19 @@
-package firstpackage;
+package classes;
 
 public class ClasaLocuri {
-	private Integer numarLocuri;
+	private int numarLocuri;
 	private float pret;
 	
-	public ClasaLocuri(Integer numarLocuri, float pret) {
+	public ClasaLocuri(int numarLocuri, float pret) {
 		this.numarLocuri = numarLocuri;
 		this.pret = pret;
 	}
 
-	public Integer getNumarLocuri() {
+	public int getNumarLocuri() {
 		return numarLocuri;
 	}
 
-	public void setNumarLocuri(Integer numarLocuri) {
+	public void setNumarLocuri(int numarLocuri) {
 		this.numarLocuri = numarLocuri;
 	}
 

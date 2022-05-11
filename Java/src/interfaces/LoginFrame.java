@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import interfaces.BazaDeDate;
+import classes.DatabaseConnection;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -46,8 +46,8 @@ public class LoginFrame extends JFrame {
 	private boolean bdpDeschisa=false;
 	private boolean bdcDeschisa=false;
 	private Color colorWarning = new Color(245, 113, 113);
-	private BazaDeDate bdPersonal;
-	private BazaDeDate bdCompanii;
+	private DatabaseConnection bdPersonal;
+	private DatabaseConnection bdCompanii;
 
 	/**
 	 * Launch the application.
@@ -97,10 +97,10 @@ public class LoginFrame extends JFrame {
 						JFrame frame = new MainFrame();
 					}
 					if (bdpDeschisa) {
-						bdPersonal.deconectare();
+						bdPersonal.disconnect();
 					}
 					if (bdcDeschisa) {
-						bdCompanii.deconectare();
+						bdCompanii.disconnect();
 					}
 
 				} catch (IOException e1) {
@@ -111,21 +111,21 @@ public class LoginFrame extends JFrame {
 		});
 		if (tipUtilizator.indexOf("Personal Aeroport") != -1) {
 			System.out.println("Ha!");
-			bdPersonal = new BazaDeDate("jdbc:mysql://localhost:3306/pj", "root", "root");
-			bdPersonal.conectare();
+			bdPersonal = new DatabaseConnection("jdbc:mysql://localhost:3306/pj", "root", "root");
+			bdPersonal.connect();
 			bdpDeschisa=true;
 			try {
-				bdPersonal.citireDate("SELECT * FROM login_personal");
+				bdPersonal.sendQuery("SELECT * FROM login_personal");
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		} else if (tipUtilizator.indexOf("Companie Aeriana") != -1) {
-			bdCompanii = new BazaDeDate("jdbc:mysql://localhost:3306/proiect_fis", "root", "root");
-			bdCompanii.conectare();
+			bdCompanii = new DatabaseConnection("jdbc:mysql://localhost:3306/proiect_fis", "root", "root");
+			bdCompanii.connect();
 			bdcDeschisa=true;
 			try {
-				bdCompanii.citireDate("SELECT * FROM login_companii");
+				bdCompanii.sendQuery("SELECT * FROM login_companii");
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

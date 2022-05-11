@@ -1,16 +1,18 @@
-package firstpackage;
+package classes;
+
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 public class PersonalAeroport extends Utilizator{
 	private PlataFizic plata;
 	
-	public PersonalAeroport(float pretBilet, String nume, String prenume, String email, String telefon,
+	public PersonalAeroport(Pair<Integer, Integer> locuriDorite, float pretBilet, String nume, String prenume, String email, String telefon,
 			Integer varsta) {
-		super(pretBilet, nume, prenume, email, telefon, varsta);
+		super(locuriDorite, pretBilet, nume, prenume, email, telefon, varsta);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public float calculPret(LocDorit[] locuriDorite, Cursa cursa, Boolean dusIntors) {
+	public float calculPret(Cursa cursa, Boolean dusIntors) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

@@ -1,4 +1,4 @@
-package firstpackage;
+package classes;
 
 public enum PlataFizic {
 	Card,
