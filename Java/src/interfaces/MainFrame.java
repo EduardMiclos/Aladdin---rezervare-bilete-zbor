@@ -34,6 +34,8 @@ public class MainFrame extends JFrame {
 			public void run() {
 				try {
 					MainFrame frame = new MainFrame();
+					frame.setLocationRelativeTo(null);
+					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -90,7 +92,7 @@ public class MainFrame extends JFrame {
 	    /* ---------------------------------- */
 		
 	    /* COMPANIE AERIANA BUTTON --- FLIGHT MANAGEMENT SYSTEM. */
-		JButton btnCompanieAeriana = createButton("Login Companie Aerian\u0103", 
+		JButton btnCompanieAeriana = createButton("Login companie aerian\u0103", 
 				11, 
 				289, 85, 183, 21, 
 				new Color(230, 231, 252));
@@ -98,21 +100,25 @@ public class MainFrame extends JFrame {
 		btnCompanieAeriana.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new LoginFrame("CA");
+				LoginFrame frame = new LoginFrame('C');
+				frame.setLocationRelativeTo(null);
+				frame.setVisible(true);
 				dispose();
 			}
 		});
 		/* ---------------------------------------------------- */
 		
 		/* PERSONAL AEROPORT BUTTON --- FLIGHT MANAGEMENT SYSTEM. */
-		JButton btnPersonalAeroport = createButton("Login Personal Aeroport", 
+		JButton btnPersonalAeroport = createButton("Login personal aeroport", 
 				11, 
 				22, 85, 183, 21, 
 				new Color(230, 231, 252));
 		
 		btnPersonalAeroport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				new LoginFrame("PA");
+				LoginFrame frame = new LoginFrame('P');
+				frame.setLocationRelativeTo(null);
+				frame.setVisible(true);
 				dispose();
 			}
 		});
