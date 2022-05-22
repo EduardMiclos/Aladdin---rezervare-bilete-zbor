@@ -44,7 +44,6 @@ public class CompanieAeriana {
 	@Override
 	public String toString() {
 		return "CompanieAeriana [curse=" + curse.toString() + "]";
-	}
-	
+	}	
 	
 }

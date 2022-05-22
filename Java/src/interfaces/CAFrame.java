@@ -14,11 +14,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import java.awt.Component;
+import java.awt.Cursor;
+
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.Vector;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -34,6 +39,10 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 import classes.ClasaLocuri;
 import classes.CompanieAeriana;
@@ -60,6 +69,9 @@ public class CAFrame extends JFrame {
 	private JButton btnSave;
 	private JButton btnUndo;
 
+	private JButton btnAddStopover;
+	private JButton btnAddDay;
+	
 	private DatabaseConnection dbConn;
 	private static int currentID;
 	private static int dimension;
@@ -89,9 +101,14 @@ public class CAFrame extends JFrame {
 	private JTable table;
 	private DefaultTableModel tableModel;
 
+	private JLabel lblDatePicker;
+	private JDatePickerImpl datePicker;
+	
 	CompanieAeriana companieAeriana;
 	Cursa cursaCurenta;
 
+	private Vector<String> functionDays = null; 
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -118,10 +135,13 @@ public class CAFrame extends JFrame {
 		spnDiscount1.setValue(cursa.getDiscountDusIntors());
 		spnDiscount2.setValue(cursa.getDiscountLastMinute());
 		
-		Vector<Date> date = new Vector<Date>();
+		Vector<String> date = new Vector<String>();
+		
+		String datePattern = "dd-MM-yyyy";
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
 		
 		for (ZiOperare zi : cursa.getZileOperare()) {
-			date.add(zi.getData());
+			date.add(simpleDateFormat.format(zi.getData()));
 		}
 		
 		comboDay.setModel(new DefaultComboBoxModel(date));
@@ -148,14 +168,23 @@ public class CAFrame extends JFrame {
 		txtFlightCode.setText("");
 		txtAirplaneType.setText("");
 		
-		spnBusinessSeats.setValue(spnBusinessSeats.getMinimumSize());
-		spnEconomySeats.setValue(spnEconomySeats.getMinimumSize());
+		spnBusinessSeats.setValue(0);
+		spnEconomySeats.setValue(0);
 		
-		spnBusinessPrice.setValue(spnBusinessPrice.getMinimumSize());
-		spnEconomyPrice.setValue(spnEconomyPrice.getMinimumSize());
+		spnBusinessPrice.setValue(0);
+		spnEconomyPrice.setValue(0);
 		
-		spnDiscount1.setValue(spnDiscount1.getMinimumSize());
-		spnDiscount2.setValue(spnDiscount2.getMinimumSize());
+		spnDiscount1.setValue(0);
+		spnDiscount2.setValue(0);
+		
+		comboDay.setModel(new DefaultComboBoxModel());
+		
+		tableModel = new DefaultTableModel(
+				new Object[][] {},
+				new String[] {
+						"Aeroport", "Ora sosire", "Ora plecare"
+				});
+		table.setModel(tableModel);
 	}
 
 	private void setStatus(Status Status) {
@@ -182,6 +211,20 @@ public class CAFrame extends JFrame {
 
 		btnSave.setEnabled(Status.equals(interfaces.Status.Edit));
 		btnUndo.setEnabled(Status.equals(interfaces.Status.Edit));
+		
+		txtFlightCode.setEditable(Status.equals(interfaces.Status.Edit));
+		txtAirplaneType.setEditable(Status.equals(interfaces.Status.Edit));
+		
+		btnAddStopover.setVisible(Status.equals(interfaces.Status.Edit));
+		btnAddStopover.setEnabled(Status.equals(interfaces.Status.Edit));
+		
+		btnAddDay.setVisible(Status.equals(interfaces.Status.Edit));
+		btnAddDay.setEnabled(Status.equals(interfaces.Status.Edit));
+		
+		lblDatePicker.setVisible(Status.equals(interfaces.Status.Edit));
+		datePicker.setVisible(Status.equals(interfaces.Status.Edit)); 
+		
+		functionDays = new Vector<String>();
 	}
 
 
@@ -197,7 +240,7 @@ public class CAFrame extends JFrame {
 		ClasaLocuri clsLocuriBusiness;
 		ClasaLocuri clsLocuriEconomy;
 		
-		companieAeriana.setCurse(new Vector<Cursa>());
+		companieAeriana.setCurse(new Vector<Cursa>());		
 		
 		dbConn.rs.beforeFirst();
 		while(dbConn.rs.next()) {
@@ -265,6 +308,10 @@ public class CAFrame extends JFrame {
 		dbConn.rs.afterLast();
 	}
 	
+	private void writeFlight(Cursa cursa) {
+		
+	}
+	
 	public CAFrame(String CAuser) throws SQLException {
 		
 		companieAeriana = new CompanieAeriana(CAuser);
@@ -282,7 +329,7 @@ public class CAFrame extends JFrame {
 
 		setTitle("Companie Aerian\u0103 - Gestiune baz\u0103 de date");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 842, 525);
+		setBounds(100, 100, 830, 560);
 
 		/* Initially, the add item option is disabled. */
 		addItem = false;
@@ -410,43 +457,7 @@ public class CAFrame extends JFrame {
 
 				/* The current state becomes 'Edit'. */
 				setStatus(Status.Edit);
-
-				try {
-					/* We try to position the cursor on the inserting row. */
-					dbConn.rs.moveToInsertRow();
-
-					/* Incrementing the table dimension. */
-					CAFrame.dimension++;
-
-					/* We will point to the last element that was added,
-					 * so the current id will be equal to the dimension. */
-					CAFrame.currentID = CAFrame.dimension;
-
-
-					/* Preparing the interface. */
-					// afisareDate("", "", "");
-
-					addItem = true;
-				}
-				catch(SQLException sqlException) {
-					JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la scrierea in baza de date", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
-
-					/* In case the operation fails, we return to the first element. */
-					try {
-						/* We try to position the cursor on the first row. */
-						dbConn.rs.first();
-
-						/* Showing the information to the user. */
-						// afisareDate(dbConn.rs.getString("id"), dbConn.rs.getString("Nume"), dbConn.rs.getString("Varsta"));
-
-						/* The current state changes to 'Navigate'. */
-						setStatus(Status.Navigate);
-
-						CAFrame.currentID = 1;
-					} catch (SQLException exceptionSQL) {
-						JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la citirea din baza de date!", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
-					}
-				}
+				clearDisplay();
 			}
 		});
 		btnAdd.setIcon(new ImageIcon(CAFrame.class.getResource("/icons/Add.png")));
@@ -483,31 +494,87 @@ public class CAFrame extends JFrame {
 		btnSave.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(btnSave.isEnabled()) {
-					if(false){//txtId.getText().isEmpty() || txtNume.getText().isEmpty()){//txtVarsta.getText().isEmpty()) {
+				if (btnSave.isEnabled()) {
+					if (comboDay.getItemCount() == 0 || txtFlightCode.getText().isEmpty()
+						|| txtAirplaneType.getText().isEmpty() || (int)spnBusinessSeats.getValue() == 0
+						|| (float)spnBusinessPrice.getValue() == 0 || (int)spnEconomySeats.getValue() == 0 
+						|| (float)spnEconomyPrice.getValue() == 0 || tableModel.getRowCount() == 0) {
+						
 						JOptionPane.showMessageDialog(pnlMain, "Toate campurile trebuie completate!", "Eroare inregistrari", JOptionPane.ERROR_MESSAGE);
 					}
 					else {
-						try {
-							//dbConn.rs.updateInt("id", Integer.parseInt(txtId.getText()));
-							//dbConn.rs.updateString("Nume", txtNume.getText());
-							//dbConn.rs.updateInt("Varsta", Integer.parseInt(txtVarsta.getText()));
-
-							if(addItem == true) {
-								dbConn.rs.insertRow();
-								dbConn.rs.last();
-								addItem = false;
-							}
-							else {
-								dbConn.rs.updateRow();								
-							}
-
-							setStatus(Status.Navigate);
-						} catch (SQLException sqlException) {
-							JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la scrierea in baza de date", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
+						ClasaLocuri locuriBusiness = new ClasaLocuri((int)spnBusinessSeats.getValue(), 
+																	 (float)spnBusinessPrice.getValue());
+						ClasaLocuri locuriEconomy = new ClasaLocuri((int)spnEconomySeats.getValue(),
+																	(float)spnEconomyPrice.getValue());
+						
+						Vector<NodTraseu> trasee = new Vector<NodTraseu>();
+						
+						String locatie;
+						String oraSosire, oraPlecare;
+						
+						for (int i = 0; i < tableModel.getRowCount(); i++) {
+							locatie = tableModel.getValueAt(i, 0).toString();
+							oraSosire = tableModel.getValueAt(i, 1).toString();
+							oraPlecare = tableModel.getValueAt(i, 2).toString();
+							
+							NodTraseu nodTraseu = new NodTraseu(locatie, oraPlecare, oraSosire);
+							trasee.add(nodTraseu);
 						}
+						
+						Vector<ZiOperare> zileOperare = new Vector<ZiOperare>();
+						
+						String ziOperare;
+						int locuriRamaseBusiness, locuriRamaseEconomy;
+						
+						locuriRamaseBusiness = (int)spnBusinessSeats.getValue();
+						locuriRamaseEconomy = (int)spnEconomySeats.getValue();
+						
+						for(int i = 0; i < comboDay.getComponentCount(); i++) {
+							ziOperare = comboDay.getComponent(i).toString();
+							zileOperare.add(new ZiOperare(null, locuriRamaseBusiness, locuriRamaseEconomy));
+						}
+						
+						Cursa cursaNoua = new Cursa(txtFlightCode.getText(),
+								txtAirplaneType.getText(),
+								locuriBusiness,
+								locuriEconomy,
+								"T_" + txtFlightCode.getText(),
+								(float)spnDiscount1.getValue(),
+								(float)spnDiscount2.getValue()
+								);
+						
+						cursaNoua.setTrasee(trasee);
+						cursaNoua.setZileOperare(zileOperare);
 					}
 				}
+				
+				
+//				if(btnSave.isEnabled()) {
+//					if(false){//txtId.getText().isEmpty() || txtNume.getText().isEmpty()){//txtVarsta.getText().isEmpty()) {
+//						JOptionPane.showMessageDialog(pnlMain, "Toate campurile trebuie completate!", "Eroare inregistrari", JOptionPane.ERROR_MESSAGE);
+//					}
+//					else {
+//						try {
+//							//dbConn.rs.updateInt("id", Integer.parseInt(txtId.getText()));
+//							//dbConn.rs.updateString("Nume", txtNume.getText());
+//							//dbConn.rs.updateInt("Varsta", Integer.parseInt(txtVarsta.getText()));
+//
+//							if(addItem == true) {
+//								dbConn.rs.insertRow();
+//								dbConn.rs.last();
+//								addItem = false;
+//							}
+//							else {
+//								dbConn.rs.updateRow();								
+//							}
+//
+//							setStatus(Status.Navigate);
+//						} catch (SQLException sqlException) {
+//							JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la scrierea in baza de date", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
+//						}
+//					}
+//				}
 			}
 		});
 		btnSave.setIcon(new ImageIcon(CAFrame.class.getResource("/icons/save.JPG")));
@@ -521,8 +588,14 @@ public class CAFrame extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(btnUndo.isEnabled()) {
+
+					cursaCurenta = companieAeriana.getCurse().elementAt(0);
+					CAFrame.currentID  = 1;
+					
+					displayData(cursaCurenta);
 					setStatus(Status.Navigate);
 
+/*					
 					if(addItem == true) {
 						addItem = false;
 
@@ -538,9 +611,13 @@ public class CAFrame extends JFrame {
 							}							
 						}
 						else {
-							// afisareDate("", "", "");
+							cursaCurenta = companieAeriana.getCurse().elementAt(0);
+							CAFrame.currentID  = 1;
+							
+							displayData(cursaCurenta);
 						}
 					}
+					 */
 				}
 			}
 		});
@@ -555,127 +632,146 @@ public class CAFrame extends JFrame {
 		pnlCenter.setBackground(SystemColor.inactiveCaptionBorder);
 		pnlMain.add(pnlCenter, BorderLayout.CENTER);
 		pnlCenter.setLayout(null);
+		
+		btnAddDay = new JButton("ADAUGARE ZI");
+		btnAddDay.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String dateString = datePicker.getJFormattedTextField().getText();
+				
+				if (!dateString.isEmpty() && !functionDays.contains(dateString)) {
+					functionDays.add(dateString);
+					comboDay.setModel(new DefaultComboBoxModel(functionDays));
+				}
+			}
+		});
+		btnAddDay.setBounds(597, 135, 163, 21);
+		btnAddDay.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 15));
+		btnAddDay.setFocusPainted(false);
+		btnAddDay.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnAddDay.setBackground(new Color(230, 231, 252));
+		pnlCenter.add(btnAddDay);
 
 		JLabel lblBusinessSeats = new JLabel("Locuri business");
-		lblBusinessSeats.setBounds(111, 149, 101, 13);
+		lblBusinessSeats.setBounds(243, 150, 101, 13);
 		lblBusinessSeats.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblBusinessSeats);
 
 		spnBusinessSeats = new JSpinner();
-		spnBusinessSeats.setBounds(202, 147, 41, 20);
+		spnBusinessSeats.setBounds(334, 148, 41, 20);
 		spnBusinessSeats.setModel(new SpinnerNumberModel(0, 0, 30, 1));
 		pnlCenter.add(spnBusinessSeats);
 
 		JLabel lblFlightCode = new JLabel("Cod curs\u0103");
-		lblFlightCode.setBounds(111, 82, 63, 13);
+		lblFlightCode.setBounds(243, 83, 63, 13);
 		lblFlightCode.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblFlightCode);
 
 		JLabel lblAirplaneType = new JLabel("Tip avion");
-		lblAirplaneType.setBounds(111, 105, 76, 13);
+		lblAirplaneType.setBounds(243, 106, 76, 13);
 		lblAirplaneType.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblAirplaneType);
 
 		spnEconomySeats = new JSpinner();
-		spnEconomySeats.setBounds(202, 178, 41, 20);
+		spnEconomySeats.setBounds(334, 179, 41, 20);
 		spnEconomySeats.setModel(new SpinnerNumberModel(0, 0, 30, 1));
 		pnlCenter.add(spnEconomySeats);
 
 		lblEconomySeats = new JLabel("Locuri economy");
-		lblEconomySeats.setBounds(111, 180, 101, 13);
+		lblEconomySeats.setBounds(243, 181, 101, 13);
 		lblEconomySeats.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblEconomySeats);
 
 		lblBusinessPrice = new JLabel("Pre\u021B");
-		lblBusinessPrice.setBounds(297, 149, 28, 13);
+		lblBusinessPrice.setBounds(429, 150, 28, 13);
 		lblBusinessPrice.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblBusinessPrice);
 
 		spnBusinessPrice = new JSpinner();
-		spnBusinessPrice.setBounds(328, 147, 76, 20);
+		spnBusinessPrice.setBounds(460, 148, 76, 20);
 		spnBusinessPrice.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(2000), new Float(1)));
 		pnlCenter.add(spnBusinessPrice);
 
 		lblEuroIcon1 = new JLabel("\u20AC");
-		lblEuroIcon1.setBounds(409, 149, 41, 13);
+		lblEuroIcon1.setBounds(546, 149, 41, 13);
 		lblEuroIcon1.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlCenter.add(lblEuroIcon1);
 
 		lblEconomyPrice = new JLabel("Pre\u021B");
-		lblEconomyPrice.setBounds(297, 180, 28, 13);
+		lblEconomyPrice.setBounds(429, 181, 28, 13);
 		lblEconomyPrice.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblEconomyPrice);
 
 		spnEconomyPrice = new JSpinner();
-		spnEconomyPrice.setBounds(328, 178, 76, 20);
+		spnEconomyPrice.setBounds(460, 179, 76, 20);
 		spnEconomyPrice.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(2000), new Float(1)));
 		pnlCenter.add(spnEconomyPrice);
 
 		lblEuroIcon2 = new JLabel("\u20AC");
-		lblEuroIcon2.setBounds(409, 180, 41, 13);
+		lblEuroIcon2.setBounds(546, 180, 41, 13);
 		lblEuroIcon2.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlCenter.add(lblEuroIcon2);
 
 		lblPriceDiscount1 = new JLabel("Discount tip I (zboruri dus-\u00EEntors)");
 		lblPriceDiscount1.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblPriceDiscount1.setBounds(84, 224, 195, 13);
+		lblPriceDiscount1.setBounds(216, 225, 195, 13);
 		pnlCenter.add(lblPriceDiscount1);
 
 		spnDiscount1 = new JSpinner();
 		spnDiscount1.setModel(new SpinnerNumberModel(0, 0, 100, 1));
-		spnDiscount1.setBounds(277, 222, 76, 20);
+		spnDiscount1.setBounds(409, 223, 76, 20);
 		pnlCenter.add(spnDiscount1);
 
 		lblProcentIcon1 = new JLabel("%");
 		lblProcentIcon1.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblProcentIcon1.setBounds(363, 223, 41, 13);
+		lblProcentIcon1.setBounds(495, 224, 41, 13);
 		pnlCenter.add(lblProcentIcon1);
 
 		txtAirplaneType = new JTextField();
 		txtAirplaneType.setEditable(false);
-		txtAirplaneType.setBounds(174, 103, 230, 19);
+		txtAirplaneType.setBounds(306, 104, 230, 19);
 		pnlCenter.add(txtAirplaneType);
 		txtAirplaneType.setColumns(10);
 
 		txtFlightCode = new JTextField();
 		txtFlightCode.setEditable(false);
 		txtFlightCode.setColumns(10);
-		txtFlightCode.setBounds(174, 80, 151, 19);
+		txtFlightCode.setBounds(306, 81, 151, 19);
 		pnlCenter.add(txtFlightCode);
 
 		lblTitle = new JLabel("GESTIUNE CURSE - " + companieAeriana.getNumeCompanie());
 		lblTitle.setFont(new Font("Yu Gothic UI Semilight", Font.BOLD, 27));
-		lblTitle.setBounds(141, 0, 539, 42);
+		lblTitle.setBounds(204, 0, 539, 42);
 		pnlCenter.add(lblTitle);
 
 		lblProcentIcon2 = new JLabel("%");
 		lblProcentIcon2.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblProcentIcon2.setBounds(363, 248, 41, 13);
+		lblProcentIcon2.setBounds(495, 249, 41, 13);
 		pnlCenter.add(lblProcentIcon2);
 
 		spnDiscount2 = new JSpinner();
 		spnDiscount2.setModel(new SpinnerNumberModel(0, 0, 100, 1));
-		spnDiscount2.setBounds(277, 247, 76, 20);
+		spnDiscount2.setBounds(409, 248, 76, 20);
 		pnlCenter.add(spnDiscount2);
 
 		lblPriceDiscount2 = new JLabel("Discount tip Ii (zboruri last-minute)");
 		lblPriceDiscount2.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblPriceDiscount2.setBounds(84, 249, 195, 13);
+		lblPriceDiscount2.setBounds(216, 250, 195, 13);
 		pnlCenter.add(lblPriceDiscount2);
 
 		lblRoute = new JLabel("TRASEU CURS\u0102");
 		lblRoute.setFont(new Font("Yu Gothic UI Light", Font.BOLD, 18));
-		lblRoute.setBounds(84, 293, 194, 29);
+		lblRoute.setBounds(306, 293, 194, 29);
 		pnlCenter.add(lblRoute);
 
 		comboDay = new JComboBox();
 		comboDay.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		comboDay.setBounds(174, 51, 230, 21);
+		comboDay.setBounds(306, 52, 192, 21);
 		pnlCenter.add(comboDay);
 
 		JLabel lblDay = new JLabel("Zile operare");
 		lblDay.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblDay.setBounds(101, 54, 63, 13);
+		lblDay.setBounds(233, 57, 63, 13);
 		pnlCenter.add(lblDay);
 
 		Panel panel = new Panel();
@@ -698,8 +794,40 @@ public class CAFrame extends JFrame {
 		pnlCenter.add(panel);
 
 		JPanel pnlDatePicker = new JPanel();
-		pnlDatePicker.setBounds(460, 66, 337, 243);
+		pnlDatePicker.setBackground(SystemColor.inactiveCaptionBorder);
+		pnlDatePicker.setBounds(572, 97, 212, 42);
+		
+		UtilDateModel model = new UtilDateModel();
+		
+		Properties properties = new Properties();
+		properties.put("text.today", "Today");
+		properties.put("text.month", "Month");
+		properties.put("text.year", "Year");
+		
+		JDatePanelImpl datePanel = new JDatePanelImpl(model, properties);
+		datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+		pnlDatePicker.add(datePicker);
 		pnlCenter.add(pnlDatePicker);
+		
+		btnAddStopover = new JButton("ADAUGA ESCALA");
+		btnAddStopover.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				tableModel.addRow(new Object[]{" ", " ", ""});
+			}
+		});
+		btnAddStopover.setBounds(620, 449, 177, 29);
+		pnlCenter.add(btnAddStopover);
+		
+		btnAddStopover.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 15));
+		btnAddStopover.setFocusPainted(false);
+		btnAddStopover.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnAddStopover.setBackground(new Color(230, 231, 252));
+		
+		lblDatePicker = new JLabel("Selectare zile operare");
+		lblDatePicker.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		lblDatePicker.setBounds(606, 83, 125, 13);
+		pnlCenter.add(lblDatePicker);
 		
 		if(CAFrame.dimension > 0) {
 			CAFrame.currentID = 1;
@@ -710,7 +838,7 @@ public class CAFrame extends JFrame {
 		txtReg.setText(CAFrame.currentID + "/" + CAFrame.dimension);
 		setStatus(Status.Navigate);
 	}
-	
+		
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
