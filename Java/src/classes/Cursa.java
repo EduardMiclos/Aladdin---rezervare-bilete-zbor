@@ -102,6 +102,41 @@ public class Cursa {
 		this.discountLastMinute = discountLastMinute;
 	}
 
+	public String getLocatii()
+	{
+		String locatii = "";
+		for (NodTraseu traseu : trasee)
+		{
+			locatii += traseu.getNumeAeroport() + ";";
+		}
+		locatii = locatii.substring(0, locatii.length() - 1);
+		return locatii;
+	}
+	
+	public String getOreSosire()
+	{
+		String oreSosire = "";
+		
+		for (NodTraseu traseu : trasee)
+		{
+			oreSosire += traseu.getOraSosire() + ";";
+		}
+		oreSosire = oreSosire.substring(0, oreSosire.length() - 1);
+		return oreSosire;
+	}
+	
+	public String getOrePlecare()
+	{
+		String orePlecare = "";
+		
+		for (NodTraseu traseu : trasee)
+		{
+			orePlecare += traseu.getOraPlecare() + ";";
+ 		}
+		orePlecare = orePlecare.substring(0, orePlecare.length() - 1);
+		return orePlecare;
+	}
+	
 	@Override
 	public String toString() {
 		return "Cursa [codCursa=" + codCursa + ", tipAvion=" + tipAvion + ", locuriBusines=" + locuriBusiness

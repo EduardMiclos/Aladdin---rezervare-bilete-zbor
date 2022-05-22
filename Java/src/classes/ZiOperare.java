@@ -5,13 +5,13 @@ import java.util.Date;
 
 public class ZiOperare {
 	private Date data;
-	private int locuriRamaseB;
-	private int locuriRamaseA;
+	private int locuriRamaseBusiness;
+	private int locuriRamaseEconomy;
 	
-	public ZiOperare(Date data, int locuriRamaseB, int locuriRamaseA) {
+	public ZiOperare(Date data, int locuriRamaseBusiness, int locuriRamaseEconomy) {
 		this.data = data;
-		this.locuriRamaseB = locuriRamaseB;
-		this.locuriRamaseA = locuriRamaseA;
+		this.locuriRamaseBusiness = locuriRamaseBusiness;
+		this.locuriRamaseEconomy = locuriRamaseEconomy;
 	}
 
 	public Date getData() {
@@ -22,25 +22,25 @@ public class ZiOperare {
 		this.data = data;
 	}
 
-	public Integer getLocuriRamaseB() {
-		return locuriRamaseB;
+	public Integer getLocuriRamaseBusiness() {
+		return locuriRamaseBusiness;
 	}
 
-	public void setLocuriRamaseB(Integer locuriRamaseB) {
-		this.locuriRamaseB = locuriRamaseB;
+	public void setLocuriRamaseBusiness(Integer locuriRamaseBusiness) {
+		this.locuriRamaseBusiness = locuriRamaseBusiness;
 	}
 
-	public int getLocuriRamaseA() {
-		return locuriRamaseA;
+	public int getLocuriRamaseEconomy() {
+		return locuriRamaseEconomy;
 	}
 
-	public void setLocuriRamaseA(Integer locuriRamaseA) {
-		this.locuriRamaseA = locuriRamaseA;
+	public void setLocuriRamaseEconomy(Integer locuriRamaseEconomy) {
+		this.locuriRamaseEconomy = locuriRamaseEconomy;
 	}
 
 	@Override
 	public String toString() {
-		return "ZiOperare [data=" + data + ", locuriRamaseB=" + locuriRamaseB + ", locuriRamaseA=" + locuriRamaseA
+		return "ZiOperare [data=" + data + ", locuriRamaseB=" + locuriRamaseBusiness + ", locuriRamaseA=" + locuriRamaseEconomy
 				+ "]";
 	}
 	

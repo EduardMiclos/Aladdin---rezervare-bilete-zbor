@@ -39,8 +39,12 @@ public class DatabaseConnection {
 		}
 	}
 
-	public void sendQuery(String query) throws SQLException{
+	public void sendQuery(String query) throws SQLException {
 		this.rs = this.sql.executeQuery(query);
+	}
+	
+	public void sendUpdate(String query) throws SQLException {
+		this.sql.executeUpdate(query);
 	}
 
 	public int tableSize() throws SQLException {		

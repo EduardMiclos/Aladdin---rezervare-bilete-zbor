@@ -21,9 +21,11 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Vector;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -177,7 +179,8 @@ public class CAFrame extends JFrame {
 		spnDiscount1.setValue(0);
 		spnDiscount2.setValue(0);
 		
-		comboDay.setModel(new DefaultComboBoxModel());
+		functionDays = new Vector<String>();
+		comboDay.setModel(new DefaultComboBoxModel(functionDays));
 		
 		tableModel = new DefaultTableModel(
 				new Object[][] {},
@@ -223,8 +226,6 @@ public class CAFrame extends JFrame {
 		
 		lblDatePicker.setVisible(Status.equals(interfaces.Status.Edit));
 		datePicker.setVisible(Status.equals(interfaces.Status.Edit)); 
-		
-		functionDays = new Vector<String>();
 	}
 
 
@@ -308,8 +309,70 @@ public class CAFrame extends JFrame {
 		dbConn.rs.afterLast();
 	}
 	
-	private void writeFlight(Cursa cursa) {
+	private String getRandomAlphanumerics(int length)
+	{
+		String code = "";
+		int leftLimit = 48;
+		int rightLimit = 90;
 		
+		Random random = new Random();
+		
+		code = random.ints(leftLimit, rightLimit + 1)
+		.filter(i -> (i >= 48 && i <= 57) || (i >= 65 && i <+ 90))
+		.limit(length)
+		.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+	      .toString();
+		
+		return code;
+	}
+	
+	private void writeFlight(Cursa cursa) {
+		try {
+			/* Writing in all three databases. */
+			
+			dbConn.sendUpdate("INSERT INTO curse VALUES (" + 
+			         "'" + cursa.getCodCursa() + 
+					"','" + companieAeriana.getNumeCompanie() + 
+					"','" + cursa.getTipAvion() + 
+					"','" + cursa.getLocuriBusiness().getNumarLocuri() + 
+					"','" + cursa.getLocuriBusiness().getPret() + 
+					"','" + cursa.getLocuriEconomy().getNumarLocuri() + 
+					"','" + cursa.getLocuriEconomy().getPret() + 
+					"','" + cursa.getCodTraseu() + 
+					"','" + cursa.getDiscountDusIntors() + 
+					"','" + cursa.getDiscountLastMinute() + "')");
+			
+			dbConn.sendUpdate("INSERT INTO trasee VALUES (" +
+					"'" + cursa.getCodTraseu() +
+					"','" + cursa.getLocatii() + 
+					"','" + cursa.getOreSosire() + 
+					"','" + cursa.getOrePlecare() + "')");
+			
+			String codZbor = "";
+			
+			for (ZiOperare ziOperare : cursa.getZileOperare())
+			{
+				codZbor = cursa.getCodCursa() + getRandomAlphanumerics(3);
+				
+				java.text.SimpleDateFormat sdf = 
+					     new java.text.SimpleDateFormat("yyyy-MM-dd");
+				
+				ziOperare.getData().setYear(ziOperare.getData().getYear() - 1900);
+				
+				dbConn.sendUpdate("INSERT INTO zboruri VALUES(" +
+					"'" + codZbor + 
+					"','" + cursa.getCodCursa() +
+					"','" + sdf.format(ziOperare.getData())+
+					"','" + ziOperare.getLocuriRamaseBusiness() +
+					"','" + ziOperare.getLocuriRamaseEconomy() + "')");
+			}
+			
+			companieAeriana.getCurse().add(cursa);
+			dimension++;
+		} catch (SQLException sqlException) {
+			JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la scrierea in baza de date!", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
+			sqlException.printStackTrace();
+		}
 	}
 	
 	public CAFrame(String CAuser) throws SQLException {
@@ -489,7 +552,7 @@ public class CAFrame extends JFrame {
 		/* ----------------------------------- */
 
 
-		/* EDIT --- SAVING ELEMENT. #TdbConn */
+		/* EDIT --- SAVING ELEMENT. */
 		btnSave = new JButton("");
 		btnSave.addMouseListener(new MouseAdapter() {
 			@Override
@@ -524,15 +587,21 @@ public class CAFrame extends JFrame {
 						
 						Vector<ZiOperare> zileOperare = new Vector<ZiOperare>();
 						
-						String ziOperare;
+						String[] ziOperare;
 						int locuriRamaseBusiness, locuriRamaseEconomy;
 						
 						locuriRamaseBusiness = (int)spnBusinessSeats.getValue();
 						locuriRamaseEconomy = (int)spnEconomySeats.getValue();
 						
-						for(int i = 0; i < comboDay.getComponentCount(); i++) {
-							ziOperare = comboDay.getComponent(i).toString();
-							zileOperare.add(new ZiOperare(null, locuriRamaseBusiness, locuriRamaseEconomy));
+						for(int i = 0; i < functionDays.size(); i++) {
+							ziOperare = functionDays.elementAt(i).split("-");
+							
+							Date zi = new Date(
+									Integer.parseInt(ziOperare[2]), 
+									Integer.parseInt(ziOperare[1]), 
+									Integer.parseInt(ziOperare[0]));
+							
+							zileOperare.add(new ZiOperare(zi, locuriRamaseBusiness, locuriRamaseEconomy));
 						}
 						
 						Cursa cursaNoua = new Cursa(txtFlightCode.getText(),
@@ -546,35 +615,12 @@ public class CAFrame extends JFrame {
 						
 						cursaNoua.setTrasee(trasee);
 						cursaNoua.setZileOperare(zileOperare);
+						
+						writeFlight(cursaNoua);
+						setStatus(Status.Navigate);
+						displayData(cursaCurenta);
 					}
 				}
-				
-				
-//				if(btnSave.isEnabled()) {
-//					if(false){//txtId.getText().isEmpty() || txtNume.getText().isEmpty()){//txtVarsta.getText().isEmpty()) {
-//						JOptionPane.showMessageDialog(pnlMain, "Toate campurile trebuie completate!", "Eroare inregistrari", JOptionPane.ERROR_MESSAGE);
-//					}
-//					else {
-//						try {
-//							//dbConn.rs.updateInt("id", Integer.parseInt(txtId.getText()));
-//							//dbConn.rs.updateString("Nume", txtNume.getText());
-//							//dbConn.rs.updateInt("Varsta", Integer.parseInt(txtVarsta.getText()));
-//
-//							if(addItem == true) {
-//								dbConn.rs.insertRow();
-//								dbConn.rs.last();
-//								addItem = false;
-//							}
-//							else {
-//								dbConn.rs.updateRow();								
-//							}
-//
-//							setStatus(Status.Navigate);
-//						} catch (SQLException sqlException) {
-//							JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la scrierea in baza de date", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
-//						}
-//					}
-//				}
 			}
 		});
 		btnSave.setIcon(new ImageIcon(CAFrame.class.getResource("/icons/save.JPG")));
@@ -582,7 +628,7 @@ public class CAFrame extends JFrame {
 		/* ----------------------------- */
 
 
-		/* EDIT --- UNDO. #TdbConn */
+		/* EDIT --- UNDO. */
 		btnUndo = new JButton("");
 		btnUndo.addMouseListener(new MouseAdapter() {
 			@Override
@@ -594,30 +640,6 @@ public class CAFrame extends JFrame {
 					
 					displayData(cursaCurenta);
 					setStatus(Status.Navigate);
-
-/*					
-					if(addItem == true) {
-						addItem = false;
-
-						CAFrame.dimension--;
-						CAFrame.currentID = CAFrame.dimension;
-
-						if(CAFrame.dimension > 0) {
-							try {
-								dbConn.rs.last();
-								// afisareDate(dbConn.rs.getString("id"), dbConn.rs.getString("Nume"), dbConn.rs.getString("Varsta"));
-							} catch (SQLException e1) {
-								e1.printStackTrace();
-							}							
-						}
-						else {
-							cursaCurenta = companieAeriana.getCurse().elementAt(0);
-							CAFrame.currentID  = 1;
-							
-							displayData(cursaCurenta);
-						}
-					}
-					 */
 				}
 			}
 		});
@@ -638,8 +660,15 @@ public class CAFrame extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				String dateString = datePicker.getJFormattedTextField().getText();
+				String[] dateStringArr = dateString.split("-");
 				
-				if (!dateString.isEmpty() && !functionDays.contains(dateString)) {
+				LocalDate date = LocalDate.of(Integer.parseInt(dateStringArr[2]), Integer.parseInt(dateStringArr[1]), Integer.parseInt(dateStringArr[0]));
+				
+				if (LocalDate.now().isAfter(date))
+				{
+					JOptionPane.showMessageDialog(pnlMain, "Data selectata se afla in trecut!", "Eroare data", JOptionPane.ERROR_MESSAGE);
+				}
+				else if (!dateString.isEmpty() && !functionDays.contains(dateString)) {
 					functionDays.add(dateString);
 					comboDay.setModel(new DefaultComboBoxModel(functionDays));
 				}
@@ -718,7 +747,7 @@ public class CAFrame extends JFrame {
 		pnlCenter.add(lblPriceDiscount1);
 
 		spnDiscount1 = new JSpinner();
-		spnDiscount1.setModel(new SpinnerNumberModel(0, 0, 100, 1));
+		spnDiscount1.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(100), new Float(1)));
 		spnDiscount1.setBounds(409, 223, 76, 20);
 		pnlCenter.add(spnDiscount1);
 
@@ -750,7 +779,7 @@ public class CAFrame extends JFrame {
 		pnlCenter.add(lblProcentIcon2);
 
 		spnDiscount2 = new JSpinner();
-		spnDiscount2.setModel(new SpinnerNumberModel(0, 0, 100, 1));
+		spnDiscount2.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(100), new Float(1)));
 		spnDiscount2.setBounds(409, 248, 76, 20);
 		pnlCenter.add(spnDiscount2);
 
