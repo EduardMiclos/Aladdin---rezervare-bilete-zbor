@@ -115,7 +115,7 @@ public class PAFrame extends JFrame {
 		pnlCenter.add(lblTitle);
 		
 		JLabel lblImage = new JLabel(new ImageIcon("images\\user.png"));
-		lblImage.setBounds(222, 23, 205, 74);
+		lblImage.setBounds(247, 22, 205, 74);
 		pnlCenter.add(lblImage);
 		
 		JPanel pnlTable = new JPanel();
@@ -153,7 +153,7 @@ public class PAFrame extends JFrame {
 		lblLocation.setBounds(65, 156, 555, 54);
 		pnlCenter.add(lblLocation);
 		
-		JButton btnViewFlight = new JButton("VIZUALIZARE ZBOR");
+		JButton btnViewFlight = new JButton("VEZI LIST\u0102 REZERV\u0102RI");
 		btnViewFlight.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -165,7 +165,8 @@ public class PAFrame extends JFrame {
 				}
 				else
 				{
-					
+					PAFrameExtension_ViewFlight viewFlight = new PAFrameExtension_ViewFlight(dbConn, table.getValueAt(tableRow, 0).toString());
+					viewFlight.setVisible(true);
 				}
 			}
 		});

@@ -10,5 +10,4 @@ public class PersonalAeroport{
 		this.plata = plata;
 		this.numeAeroport = numeAeroport;
 	}
-	
 }
