@@ -143,7 +143,6 @@ public class PAFrame extends JFrame {
 		table.setModel(tableModel);
 		table.setBounds(65, 372, 489, -112);
 	
-		
 		JScrollPane scrollPane = new JScrollPane(table);
 		pnlTable.add(scrollPane);
 		pnlCenter.add(pnlTable);
