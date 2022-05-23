@@ -110,19 +110,7 @@ public class CAFrame extends JFrame {
 	Cursa cursaCurenta;
 
 	private Vector<String> functionDays = null; 
-	
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					CAFrame frame = new CAFrame("AmericanAirlines");
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	private JLabel lblImage;
 
 	private void displayData(Cursa cursa) {
 		txtFlightCode.setText(cursa.getCodCursa());
@@ -152,7 +140,13 @@ public class CAFrame extends JFrame {
 				new Object[][] {},
 				new String[] {
 						"Aeroport", "Ora sosire", "Ora plecare"
-				});
+				})
+				{
+			@Override
+		    public boolean isCellEditable(int row, int column) {
+		       return false;
+		    }
+				};
 		
 		table.setModel(tableModel);
 		
@@ -245,7 +239,7 @@ public class CAFrame extends JFrame {
 		
 		dbConn.rs.beforeFirst();
 		while(dbConn.rs.next()) {
-			codCursa = dbConn.rs.getString("CodCursa");
+			codCursa = dbConn.rs.getString("codCursa");
 			tipAvion = dbConn.rs.getString("TipAvion");
 			
 			locuriBusiness = dbConn.rs.getInt("LocuriBusiness");
@@ -392,7 +386,7 @@ public class CAFrame extends JFrame {
 
 		setTitle("Companie Aerian\u0103 - Gestiune baz\u0103 de date");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 830, 560);
+		setBounds(100, 100, 1182, 589);
 
 		/* Initially, the add item option is disabled. */
 		addItem = false;
@@ -535,6 +529,11 @@ public class CAFrame extends JFrame {
 			public void mouseClicked(MouseEvent e) {
 				String codCursaCautat = JOptionPane.showInputDialog("Introduceti codul cursei:");
 				
+				if (codCursaCautat == null || codCursaCautat.isEmpty())
+				{
+					return;
+				}
+				
 				CAFrame.currentID = 0;
 				for(Cursa itrCursa : companieAeriana.getCurse()) {
 					currentID++;
@@ -674,7 +673,7 @@ public class CAFrame extends JFrame {
 				}
 			}
 		});
-		btnAddDay.setBounds(597, 135, 163, 21);
+		btnAddDay.setBounds(456, 154, 163, 21);
 		btnAddDay.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 15));
 		btnAddDay.setFocusPainted(false);
 		btnAddDay.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -682,129 +681,129 @@ public class CAFrame extends JFrame {
 		pnlCenter.add(btnAddDay);
 
 		JLabel lblBusinessSeats = new JLabel("Locuri business");
-		lblBusinessSeats.setBounds(243, 150, 101, 13);
+		lblBusinessSeats.setBounds(102, 169, 101, 13);
 		lblBusinessSeats.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblBusinessSeats);
 
 		spnBusinessSeats = new JSpinner();
-		spnBusinessSeats.setBounds(334, 148, 41, 20);
+		spnBusinessSeats.setBounds(193, 167, 41, 20);
 		spnBusinessSeats.setModel(new SpinnerNumberModel(0, 0, 30, 1));
 		pnlCenter.add(spnBusinessSeats);
 
 		JLabel lblFlightCode = new JLabel("Cod curs\u0103");
-		lblFlightCode.setBounds(243, 83, 63, 13);
+		lblFlightCode.setBounds(102, 102, 63, 13);
 		lblFlightCode.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblFlightCode);
 
 		JLabel lblAirplaneType = new JLabel("Tip avion");
-		lblAirplaneType.setBounds(243, 106, 76, 13);
+		lblAirplaneType.setBounds(102, 125, 76, 13);
 		lblAirplaneType.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblAirplaneType);
 
 		spnEconomySeats = new JSpinner();
-		spnEconomySeats.setBounds(334, 179, 41, 20);
+		spnEconomySeats.setBounds(193, 198, 41, 20);
 		spnEconomySeats.setModel(new SpinnerNumberModel(0, 0, 30, 1));
 		pnlCenter.add(spnEconomySeats);
 
 		lblEconomySeats = new JLabel("Locuri economy");
-		lblEconomySeats.setBounds(243, 181, 101, 13);
+		lblEconomySeats.setBounds(102, 200, 101, 13);
 		lblEconomySeats.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblEconomySeats);
 
 		lblBusinessPrice = new JLabel("Pre\u021B");
-		lblBusinessPrice.setBounds(429, 150, 28, 13);
+		lblBusinessPrice.setBounds(288, 169, 28, 13);
 		lblBusinessPrice.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblBusinessPrice);
 
 		spnBusinessPrice = new JSpinner();
-		spnBusinessPrice.setBounds(460, 148, 76, 20);
+		spnBusinessPrice.setBounds(319, 167, 76, 20);
 		spnBusinessPrice.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(2000), new Float(1)));
 		pnlCenter.add(spnBusinessPrice);
 
 		lblEuroIcon1 = new JLabel("\u20AC");
-		lblEuroIcon1.setBounds(546, 149, 41, 13);
+		lblEuroIcon1.setBounds(405, 168, 41, 13);
 		lblEuroIcon1.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlCenter.add(lblEuroIcon1);
 
 		lblEconomyPrice = new JLabel("Pre\u021B");
-		lblEconomyPrice.setBounds(429, 181, 28, 13);
+		lblEconomyPrice.setBounds(288, 200, 28, 13);
 		lblEconomyPrice.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		pnlCenter.add(lblEconomyPrice);
 
 		spnEconomyPrice = new JSpinner();
-		spnEconomyPrice.setBounds(460, 179, 76, 20);
+		spnEconomyPrice.setBounds(319, 198, 76, 20);
 		spnEconomyPrice.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(2000), new Float(1)));
 		pnlCenter.add(spnEconomyPrice);
 
 		lblEuroIcon2 = new JLabel("\u20AC");
-		lblEuroIcon2.setBounds(546, 180, 41, 13);
+		lblEuroIcon2.setBounds(405, 199, 41, 13);
 		lblEuroIcon2.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlCenter.add(lblEuroIcon2);
 
 		lblPriceDiscount1 = new JLabel("Discount tip I (zboruri dus-\u00EEntors)");
 		lblPriceDiscount1.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblPriceDiscount1.setBounds(216, 225, 195, 13);
+		lblPriceDiscount1.setBounds(75, 244, 195, 13);
 		pnlCenter.add(lblPriceDiscount1);
 
 		spnDiscount1 = new JSpinner();
 		spnDiscount1.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(100), new Float(1)));
-		spnDiscount1.setBounds(409, 223, 76, 20);
+		spnDiscount1.setBounds(268, 242, 76, 20);
 		pnlCenter.add(spnDiscount1);
 
 		lblProcentIcon1 = new JLabel("%");
 		lblProcentIcon1.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblProcentIcon1.setBounds(495, 224, 41, 13);
+		lblProcentIcon1.setBounds(354, 243, 41, 13);
 		pnlCenter.add(lblProcentIcon1);
 
 		txtAirplaneType = new JTextField();
 		txtAirplaneType.setEditable(false);
-		txtAirplaneType.setBounds(306, 104, 230, 19);
+		txtAirplaneType.setBounds(165, 123, 230, 19);
 		pnlCenter.add(txtAirplaneType);
 		txtAirplaneType.setColumns(10);
 
 		txtFlightCode = new JTextField();
 		txtFlightCode.setEditable(false);
 		txtFlightCode.setColumns(10);
-		txtFlightCode.setBounds(306, 81, 151, 19);
+		txtFlightCode.setBounds(165, 100, 151, 19);
 		pnlCenter.add(txtFlightCode);
 
 		lblTitle = new JLabel("GESTIUNE CURSE - " + companieAeriana.getNumeCompanie());
-		lblTitle.setFont(new Font("Yu Gothic UI Semilight", Font.BOLD, 27));
-		lblTitle.setBounds(204, 0, 539, 42);
+		lblTitle.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 27));
+		lblTitle.setBounds(63, 19, 701, 42);
 		pnlCenter.add(lblTitle);
 
 		lblProcentIcon2 = new JLabel("%");
 		lblProcentIcon2.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblProcentIcon2.setBounds(495, 249, 41, 13);
+		lblProcentIcon2.setBounds(354, 268, 41, 13);
 		pnlCenter.add(lblProcentIcon2);
 
 		spnDiscount2 = new JSpinner();
 		spnDiscount2.setModel(new SpinnerNumberModel(new Float(0), new Float(0), new Float(100), new Float(1)));
-		spnDiscount2.setBounds(409, 248, 76, 20);
+		spnDiscount2.setBounds(268, 267, 76, 20);
 		pnlCenter.add(spnDiscount2);
 
 		lblPriceDiscount2 = new JLabel("Discount tip Ii (zboruri last-minute)");
 		lblPriceDiscount2.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblPriceDiscount2.setBounds(216, 250, 195, 13);
+		lblPriceDiscount2.setBounds(75, 269, 195, 13);
 		pnlCenter.add(lblPriceDiscount2);
 
 		lblRoute = new JLabel("TRASEU CURS\u0102");
 		lblRoute.setFont(new Font("Yu Gothic UI Light", Font.BOLD, 18));
-		lblRoute.setBounds(306, 293, 194, 29);
+		lblRoute.setBounds(165, 312, 194, 29);
 		pnlCenter.add(lblRoute);
 
 		comboDay = new JComboBox();
 		comboDay.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		comboDay.setBounds(306, 52, 192, 21);
+		comboDay.setBounds(165, 71, 192, 21);
 		pnlCenter.add(comboDay);
 
 		JLabel lblDay = new JLabel("Zile operare");
 		lblDay.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblDay.setBounds(233, 57, 63, 13);
+		lblDay.setBounds(92, 76, 63, 13);
 		pnlCenter.add(lblDay);
 
 		Panel panel = new Panel();
-		panel.setBounds(10, 328, 787, 115);
+		panel.setBounds(36, 348, 1084, 115);
 		panel.setLayout(new BorderLayout(0, 0));
 
 		table = new JTable();
@@ -813,7 +812,13 @@ public class CAFrame extends JFrame {
 				new Object[][] {},
 				new String[] {
 						"Aeroport", "Ora sosire", "Ora plecare"
-				});
+				})
+				{
+			@Override
+		    public boolean isCellEditable(int row, int column) {
+		       return false;
+		    }
+				};
 				
 		table.setModel(tableModel);
 		
@@ -824,7 +829,7 @@ public class CAFrame extends JFrame {
 
 		JPanel pnlDatePicker = new JPanel();
 		pnlDatePicker.setBackground(SystemColor.inactiveCaptionBorder);
-		pnlDatePicker.setBounds(572, 97, 212, 42);
+		pnlDatePicker.setBounds(431, 116, 212, 42);
 		
 		UtilDateModel model = new UtilDateModel();
 		
@@ -845,7 +850,7 @@ public class CAFrame extends JFrame {
 				tableModel.addRow(new Object[]{" ", " ", ""});
 			}
 		});
-		btnAddStopover.setBounds(620, 449, 177, 29);
+		btnAddStopover.setBounds(650, 479, 177, 29);
 		pnlCenter.add(btnAddStopover);
 		
 		btnAddStopover.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 15));
@@ -855,8 +860,12 @@ public class CAFrame extends JFrame {
 		
 		lblDatePicker = new JLabel("Selectare zile operare");
 		lblDatePicker.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblDatePicker.setBounds(606, 83, 125, 13);
+		lblDatePicker.setBounds(465, 102, 125, 13);
 		pnlCenter.add(lblDatePicker);
+		
+		lblImage = new JLabel(new ImageIcon("images\\flightCompanyImage.png"));
+		lblImage.setBounds(703, 19, 373, 312);
+		pnlCenter.add(lblImage);
 		
 		if(CAFrame.dimension > 0) {
 			CAFrame.currentID = 1;

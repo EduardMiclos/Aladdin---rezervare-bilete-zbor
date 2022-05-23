@@ -103,8 +103,6 @@ public class LoginFrame extends JFrame {
 				
 				loginSuccess = false;
 			}
-
-			rs.beforeFirst();
 			
 			return loginSuccess;
 			
@@ -333,7 +331,6 @@ public class LoginFrame extends JFrame {
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {		
 				boolean loginSuccess = logareUtilizator(db.rs);
-				
 				if(loginSuccess == true) {
 					switch(tipUtilizator) {
 					case 'C':{
@@ -342,10 +339,36 @@ public class LoginFrame extends JFrame {
 							frame.setLocationRelativeTo(null);
 							frame.setVisible(true);
 							
+							db.rs.beforeFirst();
 							dispose();
 						} catch (SQLException sqlException) {
 							sqlException.printStackTrace();
 						}
+						
+						break;
+					}
+					case 'P':{
+						String numeAeroport = "";
+						
+						try {
+							numeAeroport = db.rs.getString("aeroport");
+						} catch (SQLException sqlException) {
+							sqlException.printStackTrace();
+						}
+						
+						
+						PAFrame frame = new PAFrame(txtUser.getText(), numeAeroport);
+						frame.setLocationRelativeTo(null);
+						frame.setVisible(true);
+
+						
+						try {
+							db.rs.beforeFirst();
+						} catch (SQLException sqlException) {
+							sqlException.printStackTrace();
+						}
+						
+						dispose();
 					}
 					}
 				}
