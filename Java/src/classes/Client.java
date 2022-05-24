@@ -1,5 +1,7 @@
 package classes;
 
+import java.time.LocalDate;
+
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 public class Client {
@@ -103,7 +105,20 @@ public class Client {
 				+ ", telefon=" + telefon + ", varsta=" + varsta + "]";
 	}
 	
-	public float calculPret(Cursa cursa, Boolean dusIntors) {
-		return 0;
+	public float calculPret(float pretBusiness, float pretEconomy, float discountLastMinute, LocalDate dataZbor) {
+		
+		if (clasa == TipClasa.Business) {
+			this.pretBilet = pretBusiness;
+		}
+		else {
+			this.pretBilet = pretEconomy;
+		}
+		
+		if (LocalDate.now().plusDays(1).isAfter(dataZbor)) {
+			this.pretBilet -= discountLastMinute/100 * this.pretBilet;
+		}
+		
+		
+		return this.pretBilet;
 	}	
 }

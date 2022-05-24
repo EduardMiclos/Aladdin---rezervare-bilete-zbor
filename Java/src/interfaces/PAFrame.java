@@ -30,6 +30,8 @@ import java.awt.Cursor;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class PAFrame extends JFrame {
 
@@ -89,6 +91,12 @@ public class PAFrame extends JFrame {
 	}
 	
 	public PAFrame(String PAUser, String location) {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				dbConn.disconnect();
+			}
+		});
 		setTitle("Sistem administrativ - personal aeroport");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 723, 512);
@@ -164,7 +172,7 @@ public class PAFrame extends JFrame {
 				}
 				else
 				{
-					PAFrameExtension_ViewFlight viewFlight = new PAFrameExtension_ViewFlight(dbConn, table.getValueAt(tableRow, 0).toString());
+					PAFrameExtension_ViewFlight viewFlight = new PAFrameExtension_ViewFlight(dbConn, table.getValueAt(tableRow, 0).toString(), table.getValueAt(tableRow,  1).toString());
 					viewFlight.setVisible(true);
 				}
 			}

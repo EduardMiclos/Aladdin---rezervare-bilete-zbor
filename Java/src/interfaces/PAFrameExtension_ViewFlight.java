@@ -6,6 +6,8 @@ import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -72,23 +74,78 @@ public class PAFrameExtension_ViewFlight extends JFrame {
 				clienti.add(client);
 			}
 			
-			
-			
 		} catch (SQLException sqlException) {
 			JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la citirea din baza de date!", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
 			sqlException.printStackTrace();
 		}
 	}
 	
-	private void calculatePrice(Client client) {
-		
+	private boolean calculatePrice(DatabaseConnection dbConn, String flightCode, Client client, String flightDate) {
+		try {
+			dbConn.sendQuery("SELECT pj.curse.PretBusiness, pj.curse.pretEconomy, pj.curse.Discount_2 FROM curse, zboruri WHERE pj.curse.codCursa=pj.zboruri.codCursa AND pj.zboruri.codZbor='" + flightCode + "'");
+			
+			dbConn.rs.first();
+			
+			float pretBusiness = dbConn.rs.getFloat("pretBusiness");
+			float pretEconomy = dbConn.rs.getFloat("pretEconomy");
+			float discountLastMinute = dbConn.rs.getFloat("Discount_2");
+			
+			String[] date = flightDate.split("-");
+			
+			int year = Integer.parseInt(date[0]);
+			int month = Integer.parseInt(date[1]);
+			int day = Integer.parseInt(date[2]);
+						
+			LocalDate localDate = LocalDate.of(year, month, day);
+			
+			client.calculPret(pretBusiness, pretEconomy, discountLastMinute, localDate);
+			
+			return true;
+		} catch (SQLException sqlException) {
+			JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la citirea din baza de date!", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
+			sqlException.printStackTrace();
+			return false;
+		}
 	}
 	
-	private void writeReservation(Client client) {
-		
+	private boolean writeReservation(String flightCode, DatabaseConnection dbConn, Client client) {
+		try {
+			dbConn.sendUpdate("INSERT INTO rezervari (codZbor, clasa, pretBilet) "
+					+ "VALUES ('" + flightCode
+					+ "','" + String.valueOf(client.getClasa()
+					+ "','" + client.getPretBilet() + "')"));
+			
+			dbConn.sendUpdate("INSERT INTO clienti (nume, prenume, email, telefon, varsta, optiunePlata) "
+					+ "VALUES ('" + client.getNume()
+					+ "','" + client.getPrenume()
+					+ "','" + client.getEmail()
+					+ "','" + client.getTelefon()
+					+ "','" + client.getVarsta()
+					+ "','" + String.valueOf(client.getPlata()) + "')");
+			
+			return true;
+		} catch (SQLException sqlException) {
+			JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la scrierea in baza de date!", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
+			sqlException.printStackTrace();
+			
+			return false;
+		}
 	}
 	
-	public PAFrameExtension_ViewFlight(DatabaseConnection dbConn, String flightCode) {
+	private boolean decrementSeats(DatabaseConnection dbConn, String flightCode, String targetSeatClass, int seats) {
+		seats--;
+		
+		try {
+			dbConn.sendUpdate("UPDATE zboruri SET " + targetSeatClass + " = " + seats + " WHERE codZbor = '" + flightCode + "'");
+			return true;
+		} catch (SQLException sqlException) {
+			JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la scrierea in baza de date!", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
+			sqlException.printStackTrace();
+			return false;
+		}
+	}
+	
+	public PAFrameExtension_ViewFlight(DatabaseConnection dbConn, String flightCode, String flightDate) {
 		setTitle("List\u0103 rezerv\u0103ri - zborul " + flightCode);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 1104, 401);
@@ -154,6 +211,25 @@ public class PAFrameExtension_ViewFlight extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				
+				if (newReservation == false) {
+					JOptionPane.showMessageDialog(pnlMain, "Nu ati introdus o inregistrare noua!", "Eroare inregistrare", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				
+				int businessSeats, economySeats;
+				
+				try {
+					dbConn.sendQuery("SELECT businessRamase, economyRamase FROM zboruri WHERE codZbor='" + flightCode + "'");
+					dbConn.rs.first();
+					businessSeats = dbConn.rs.getInt("businessRamase");
+					economySeats = dbConn.rs.getInt("economyRamase");
+				} catch (SQLException sqlException) {
+					JOptionPane.showMessageDialog(pnlMain, "A aparut o eroare la citirea din baza de date!", "Eroare baza de date", JOptionPane.ERROR_MESSAGE);
+					sqlException.printStackTrace();
+					return;
+				}				
+				
 				try {
 					nume = (String) tableModel.getValueAt(clienti.size(), 0);
 					prenume = (String) tableModel.getValueAt(clienti.size(), 1);
@@ -163,15 +239,37 @@ public class PAFrameExtension_ViewFlight extends JFrame {
 					plata = TipPlata.valueOf(tableModel.getValueAt(clienti.size(), 5).toString().trim());
 					clasa = TipClasa.valueOf(tableModel.getValueAt(clienti.size(), 6).toString().trim());
 					
+					if (clasa == TipClasa.Business) {
+						if (businessSeats == 0) {
+							JOptionPane.showMessageDialog(pnlMain, "Nu mai exista locuri la clasa business!", "Eroare introducere pasager", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						else {
+							if (decrementSeats(dbConn, flightCode, "businessRamase", businessSeats) == false) {
+								return;
+							}
+						}
+					}
+					
+					if (clasa == TipClasa.Economy) {
+						if (economySeats == 0 ) {
+							JOptionPane.showMessageDialog(pnlMain, "Nu mai exista locuri la clasa economy!", "Eroare introducere pasager", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						else {
+							if (decrementSeats(dbConn, flightCode, "economyRamase", economySeats) == false) {
+								return;
+							}
+						}
+					}
+					
 					Client client = new Client(nume, prenume, email, telefon, varsta, plata, clasa);
 					clienti.add(client);
 
-					calculatePrice(client);
-					writeReservation(client);
-					
-					JOptionPane.showMessageDialog(pnlMain, "Client introdus cu succes!");
+					if (calculatePrice(dbConn, flightCode, client, flightDate) == true && writeReservation(flightCode, dbConn, client) == true) {
+						JOptionPane.showMessageDialog(pnlMain, "Client introdus cu succes!");
+					}
 
-					
 				}
 				catch(Exception exception)
 				{
