@@ -14,7 +14,7 @@ public class Client {
 	private TipPlata plata;
 	private TipClasa clasa;
 	 
-	public Client(float pretBilet, String nume, String prenume, String email, String telefon, int varsta, TipPlata plata, TipClasa clasa) {
+	public Client(String nume, String prenume, int varsta, String telefon, String email, float pretBilet, TipPlata plata, TipClasa clasa) {
 		this.pretBilet = pretBilet;
 		this.nume = nume;
 		this.prenume = prenume;
@@ -33,6 +33,13 @@ public class Client {
 		this.varsta = varsta;
 		this.plata = plata;
 		this.clasa = clasa;
+	}
+
+	public Client(String nume, String prenume, int varsta, float pretBilet) {
+		this.pretBilet = pretBilet;
+		this.nume = nume;
+		this.prenume = prenume;
+		this.varsta = varsta;
 	}
 
 	public float getPretBilet() {
@@ -117,7 +124,6 @@ public class Client {
 		if (LocalDate.now().plusDays(1).isAfter(dataZbor)) {
 			this.pretBilet -= discountLastMinute/100 * this.pretBilet;
 		}
-		
 		
 		return this.pretBilet;
 	}	

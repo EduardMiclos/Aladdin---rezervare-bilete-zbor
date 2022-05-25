@@ -65,6 +65,7 @@ import org.jdatepicker.impl.UtilDateModel;
 import classes.Client;
 import classes.Cursa;
 import classes.DatabaseConnection;
+import classes.TipClasa;
 import classes.TipPlata;
 import classes.Zbor;
 
@@ -115,9 +116,9 @@ public class UserFrame_test extends JFrame {
 	private Color colorPositive = new Color(133, 200, 138);
 	private boolean testFailed = false;
 	private boolean btnCautaCursaPressed = false;
-	private Dimension optionMinDim = new Dimension(720, 60);
-	private Dimension optionPrefDim = new Dimension(780, 70);
-	private Dimension optionMaxDim = new Dimension(950, 85);
+	private Dimension optionMinDim = new Dimension(1200, 60);
+	private Dimension optionPrefDim = new Dimension(1300, 70);
+	private Dimension optionMaxDim = new Dimension(1450, 85);
 	private DatabaseConnection bd;
 	private LocalDateTime Today = LocalDateTime.now();
 	private LocalDateTime dateLeave = null;
@@ -125,7 +126,7 @@ public class UserFrame_test extends JFrame {
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("EEEE d MMMM yyyy");
 	private ArrayList<Zbor> matchedFlights = null;
-	private ArrayList<Cursa> selectedFlight = new ArrayList<Cursa>();
+	private ArrayList<Zbor> selectedFlight = new ArrayList<Zbor>();
 	private JPanel[] matchedOptions = null;
 	private int tableSize = 0;
 
@@ -144,6 +145,9 @@ public class UserFrame_test extends JFrame {
 	private boolean flagDebitCard = false;
 	private boolean flagViramentBancar = false;
 
+	private List<Float> totalPrices = new ArrayList<Float>();
+	private float totalPrice = 0f;
+	
 	/* LABEL TEXT ALIGNMENT */
 	public void alignLabels(JPanel pnl) {
 		Component[] leaveComponents = pnl.getComponents();
@@ -262,8 +266,8 @@ public class UserFrame_test extends JFrame {
 		pnlLeave.setMinimumSize(optionMinDim);
 		pnlLeave.setPreferredSize(optionPrefDim);
 		pnlLeave.setMaximumSize(optionMaxDim);
-
-		JLabel lblCompanyName = new JLabel(departure.getNumeCompanie());
+		
+		JLabel lblCompanyName = new JLabel(departure.getCompanieAeriana());
 		pnlLeave.add(lblCompanyName);
 		pnlLeave.revalidate();
 
@@ -320,7 +324,7 @@ public class UserFrame_test extends JFrame {
 		pnlSeats.add(lblLocuriEconomy);
 		pnlSeats.revalidate();
 
-		JLabel lblOrasPlecare = new JLabel(departure.getOrasPornire());
+		JLabel lblOrasPlecare = new JLabel(departure.getOrasPlecare());
 		pnlLeave.add(lblOrasPlecare);
 		pnlLeave.revalidate();
 
@@ -328,7 +332,7 @@ public class UserFrame_test extends JFrame {
 		pnlLeave.add(vStrut_4);
 		pnlLeave.revalidate();
 
-		JLabel lblOrasSosire = new JLabel(departure.getOrasDestinatie());
+		JLabel lblOrasSosire = new JLabel(departure.getOrasSosire());
 		pnlLeave.add(lblOrasSosire);
 		pnlLeave.revalidate();
 
@@ -349,17 +353,17 @@ public class UserFrame_test extends JFrame {
 		pnlReturn.setPreferredSize(optionPrefDim);
 		pnlReturn.setMaximumSize(optionMaxDim);
 
-		JLabel lblCompanyName_1 = new JLabel(arrival.getNumeCompanie());
+		JLabel lblCompanyName_1 = new JLabel(arrival.getCompanieAeriana());
 		lblCompanyName_1.setAlignmentX(1.0f);
 		pnlReturn.add(lblCompanyName_1);
 		pnlReturn.revalidate();
 
 		JLabel lblOraPlecare_1 = new JLabel(
-				arrival.getDataPornire().getHour() + ":" + arrival.getDataPornire().getMinute());
+				arrival.getDataPlecare().getHour() + ":" + arrival.getDataPlecare().getMinute());
 		pnlReturn.add(lblOraPlecare_1);
 		pnlReturn.revalidate();
 
-		Duration flightDuration2 = Duration.between(departure.getDataPornire(), departure.getDataSosire());
+		Duration flightDuration2 = Duration.between(arrival.getDataSosire(), arrival.getDataPlecare());
 		long secondsDuration_1 = flightDuration2.getSeconds();
 		JLabel lblTimp_1 = new JLabel(secondsDuration_1 / 3600 + "h " + (secondsDuration_1 % 3600) / 60 + "min");
 		pnlReturn.add(lblTimp_1);
@@ -399,15 +403,15 @@ public class UserFrame_test extends JFrame {
 		pnlReturn.revalidate();
 		pnlSeats_1.setLayout(new BoxLayout(pnlSeats_1, BoxLayout.X_AXIS));
 
-		JLabel lblLocuriBusiness_1 = new JLabel("Business: " + arrival.getLocuriBusiness() + "  ");
+		JLabel lblLocuriBusiness_1 = new JLabel("Business: " + arrival.getBusinessRamase() + "  ");
 		pnlSeats_1.add(lblLocuriBusiness_1);
 		pnlSeats_1.revalidate();
 
-		JLabel lblLocuriEconomy_1 = new JLabel("Economy: " + arrival.getLocuriEconomy() + "  ");
+		JLabel lblLocuriEconomy_1 = new JLabel("Economy: " + arrival.getEconomyRamase() + "  ");
 		pnlSeats_1.add(lblLocuriEconomy_1);
 		pnlSeats_1.revalidate();
 
-		JLabel lblOrasPlecare_1 = new JLabel(arrival.getOrasPornire());
+		JLabel lblOrasPlecare_1 = new JLabel(arrival.getOrasPlecare());
 		pnlReturn.add(lblOrasPlecare_1);
 		pnlReturn.revalidate();
 
@@ -415,28 +419,37 @@ public class UserFrame_test extends JFrame {
 		pnlReturn.add(vStrut_9);
 		pnlReturn.revalidate();
 
-		JLabel lblOrasSosire_1 = new JLabel(arrival.getOrasDestinatie());
+		JLabel lblOrasSosire_1 = new JLabel(arrival.getOrasSosire());
 		pnlReturn.add(lblOrasSosire_1);
 		pnlReturn.revalidate();
 
 		float flightPrice = 0f;
 		if (cmbClasa.getSelectedItem().toString().equals("Economy")) {
-			flightPrice = (departure.getPretEconomy() * departure.getDiscount()
-					+ arrival.getPretEconomy() * arrival.getDiscount())
+			flightPrice = (departure.getPretEconomy() * departure.getDiscountDusIntors()/100f
+					+ arrival.getPretEconomy() * arrival.getDiscountDusIntors()/100f)
 					* Float.parseFloat(spinnAdulti.getValue().toString())
-					+ (departure.getPretEconomy() * departure.getDiscount()
-							+ arrival.getPretEconomy() * arrival.getDiscount())
+					+ (departure.getPretEconomy() * departure.getDiscountDusIntors()/100f
+							+ arrival.getPretEconomy() * arrival.getDiscountDusIntors()/100f)
 							* Float.parseFloat(spinnCopii.getValue().toString());
-		} else
-			flightPrice = (departure.getPretBusiness() * departure.getDiscount()
-					+ arrival.getPretBusiness() * arrival.getDiscount())
+		} else {
+			flightPrice = (departure.getPretBusiness() * departure.getDiscountDusIntors()/100f
+					+ arrival.getPretBusiness() * arrival.getDiscountDusIntors()/100f)
 					* Float.parseFloat(spinnAdulti.getValue().toString())
-					+ (departure.getPretBusiness() * departure.getDiscount()
-							+ arrival.getPretBusiness() * arrival.getDiscount())
+					+ (departure.getPretBusiness() * departure.getDiscountDusIntors()/100f
+							+ arrival.getPretBusiness() * arrival.getDiscountDusIntors()/100f)
 							* Float.parseFloat(spinnCopii.getValue().toString());
+		}
+		
+		if (LocalDateTime.now().plusDays(1).isAfter(departure.getDataPlecare())) {
+			flightPrice *= departure.getDiscountLastMinute();
+		}
+		
 		int aux = (int) (flightPrice * 100);
 		flightPrice = (float) (aux / 100d);
 		JLabel lblPret = new JLabel("" + flightPrice + " \u20ac");
+		
+		totalPrices.add(flightPrice);
+		
 		pnlReturn.add(lblPret);
 		pnlReturn.revalidate();
 
@@ -448,7 +461,7 @@ public class UserFrame_test extends JFrame {
 
 	/* flightOneWay --- GENERATING JPANEL FOR ONE WAY TRIP. */
 	/* NOT RELATED TO DATABASE. */
-	public JPanel flightOneWay(Cursa departure) {
+	public JPanel flightOneWay(Zbor departure) {
 		JPanel pnlFlight = new JPanel();
 
 		pnlOptions.add(pnlFlight);
@@ -468,16 +481,16 @@ public class UserFrame_test extends JFrame {
 		pnlLeave.setPreferredSize(optionPrefDim);
 		pnlLeave.setMaximumSize(optionMaxDim);
 
-		JLabel lblCompanyName = new JLabel(departure.getNumeCompanie());
+		JLabel lblCompanyName = new JLabel(departure.getCompanieAeriana());
 		pnlLeave.add(lblCompanyName);
 		pnlLeave.revalidate();
 
 		JLabel lblOraPlecare = new JLabel(
-				departure.getDataPornire().getHour() + ":" + departure.getDataPornire().getMinute());
+				departure.getDataPlecare().getHour() + ":" + departure.getDataPlecare().getMinute());
 		pnlLeave.add(lblOraPlecare);
 		pnlLeave.revalidate();
 
-		Duration flightDuration = Duration.between(departure.getDataPornire(), departure.getDataSosire());
+		Duration flightDuration = Duration.between(departure.getDataPlecare(), departure.getDataSosire());
 		long secondsDuration = flightDuration.getSeconds();
 		JLabel lblTimp = new JLabel(secondsDuration / 3600 + "h " + (secondsDuration % 3600) / 60 + "min");
 		pnlLeave.add(lblTimp);
@@ -517,15 +530,15 @@ public class UserFrame_test extends JFrame {
 		pnlLeave.revalidate();
 		pnlSeats.setLayout(new BoxLayout(pnlSeats, BoxLayout.X_AXIS));
 
-		JLabel lblLocuriBusiness = new JLabel("Business: " + departure.getLocuriBusiness() + "  ");
+		JLabel lblLocuriBusiness = new JLabel("Business: " + departure.getBusinessRamase() + "  ");
 		pnlSeats.add(lblLocuriBusiness);
 		pnlSeats.revalidate();
 
-		JLabel lblLocuriEconomy = new JLabel("Economy: " + departure.getLocuriEconomy() + "  ");
+		JLabel lblLocuriEconomy = new JLabel("Economy: " + departure.getEconomyRamase() + "  ");
 		pnlSeats.add(lblLocuriEconomy);
 		pnlSeats.revalidate();
 
-		JLabel lblOrasPlecare = new JLabel(departure.getOrasPornire());
+		JLabel lblOrasPlecare = new JLabel(departure.getOrasPlecare());
 		pnlLeave.add(lblOrasPlecare);
 		pnlLeave.revalidate();
 
@@ -533,7 +546,7 @@ public class UserFrame_test extends JFrame {
 		pnlLeave.add(vStrut_5);
 		pnlLeave.revalidate();
 
-		JLabel lblOrasSosire = new JLabel(departure.getOrasDestinatie());
+		JLabel lblOrasSosire = new JLabel(departure.getOrasSosire());
 		pnlLeave.add(lblOrasSosire);
 		pnlLeave.revalidate();
 
@@ -545,8 +558,16 @@ public class UserFrame_test extends JFrame {
 			flightPrice = departure.getPretBusiness() * Float.parseFloat(spinnAdulti.getValue().toString())
 					+ departure.getPretBusiness() * Float.parseFloat(spinnCopii.getValue().toString());
 		}
+		
+		if (LocalDateTime.now().plusDays(1).isAfter(departure.getDataPlecare())) {
+			flightPrice *= departure.getDiscountLastMinute();
+		}
+		
 		int aux = (int) (flightPrice * 100);
 		flightPrice = (float) (aux / 100d);
+		
+		totalPrices.add(flightPrice);
+		
 		JLabel lblPret = new JLabel(flightPrice + " \u20ac");
 		pnlLeave.add(lblPret);
 		pnlLeave.revalidate();
@@ -581,7 +602,7 @@ public class UserFrame_test extends JFrame {
 			}
 		}
 
-		return pairs.size() == 0 ? pairs : null;
+		return pairs.size() == 0 ? null : pairs;
 	}
 
 	/* SELECTING THE DESIRED OPTION. */
@@ -606,6 +627,8 @@ public class UserFrame_test extends JFrame {
 						selectedFlight.removeAll(selectedFlight);
 						for (int i = 1; i <= tableSize; i++) {
 							if (((JComponent) components[i]).equals(c)) {
+								totalPrice = totalPrices.get(i - 1);
+								
 								if (cbxRetur.isSelected()) {
 									selectedFlight.add(matchedFlights.get(i - 1));
 									selectedFlight.add(matchedFlights.get(i));
@@ -625,9 +648,6 @@ public class UserFrame_test extends JFrame {
 	public void cautaCurse() {
 
 		try {
-			LocalDateTime fullDLeave = endOfDay(dateLeave);
-			LocalDateTime fullDArrive = endOfDay(dateArrive);
-
 			String query;
 
 			query = "SELECT * FROM trasee" + "	LEFT JOIN curse ON curse.Traseu=trasee.idTraseu"
@@ -640,7 +660,7 @@ public class UserFrame_test extends JFrame {
 				query += " OR" + " ((Locatii LIKE '%" + txtSosire.getText() + "%' AND Locatii LIKE '%"
 						+ txtPlecare.getText() + "%')" + " AND (LOCATE('" + txtPlecare.getText()
 						+ "', Locatii) > LOCATE('" + txtSosire.getText() + "', Locatii))" + " AND zboruri.ziOperare = '"
-						+ dateArrive.format(formatter) + " )";
+						+ dateArrive.format(formatter) + "' )";
 			}
 
 			bd.sendQuery(query);
@@ -666,7 +686,7 @@ public class UserFrame_test extends JFrame {
 				matchedFlights = new ArrayList<Zbor>();
 
 				while (bd.rs.next() && i < tableSize) {
-					String startAirport, stopAirport;
+					String startAirport = "", stopAirport = "";
 					
 					String[] locations = bd.rs.getString("Locatii").split(";");
 					String[] departures = bd.rs.getString("Ore plecare").split(";");
@@ -674,16 +694,28 @@ public class UserFrame_test extends JFrame {
 					
 					LocalDateTime departureTime, arrivalTime;
 					
-					int departureIndex, arrivalIndex, idx = 0;
+					int departureIndex = 0, arrivalIndex = 0, idx = 0;
 					
 					for (String location : locations) {
 						if (location.contains(txtPlecare.getText())) {
-							startAirport = location;
-							departureIndex = idx;
+							if (startAirport.isEmpty()) {
+								startAirport = location;
+								departureIndex = idx;
+							}
+							else {
+								stopAirport = location;
+								arrivalIndex = idx;
+							}
 						}
 						if (location.contains(txtSosire.getText())) {
-							stopAirport = location;
-							arrivalIndex = idx;
+							if (startAirport.isEmpty()) {
+								startAirport = location;
+								departureIndex = idx;
+							}
+							else {
+								stopAirport = location;
+								arrivalIndex = idx;
+							}
 						}
 						idx++;
 					}
@@ -694,19 +726,19 @@ public class UserFrame_test extends JFrame {
 					String departureHour = departures[departureIndex].split(":")[0];
 					String departureMinute = departures[departureIndex].split(":")[1];
 					
-					String arrivalHour = arrivals[arrivalIndex].split(":")[1];
+					String arrivalHour = arrivals[arrivalIndex].split(":")[0];
 					String arrivalMinute = arrivals[arrivalIndex].split(":")[1];
 					
 					departureTime =  LocalDateTime.of(
-							flightDay.getYear(), 
-							flightDay.getMonth(), 
+							flightDay.getYear() + 1900, 
+							flightDay.getMonth() + 1, 
 							flightDay.getDate(), 
 							Integer.parseInt(departureHour),
 							Integer.parseInt(departureMinute));
 					
 					arrivalTime = LocalDateTime.of(
-							flightDay.getYear(), 
-							flightDay.getMonth(), 
+							flightDay.getYear() + 1900, 
+							flightDay.getMonth() + 1, 
 							flightDay.getDate(), 
 							Integer.parseInt(arrivalHour),
 							Integer.parseInt(arrivalMinute));
@@ -718,24 +750,18 @@ public class UserFrame_test extends JFrame {
 					matchedFlights.add(new Zbor(
 							bd.rs.getString("codZbor"),
 							bd.rs.getString("codCursa"),
+							bd.rs.getString("CompanieAeriana"),
 							bd.rs.getInt("businessRamase"),
 							bd.rs.getInt("economyRamase"),
+							bd.rs.getFloat("pretBusiness"),
+							bd.rs.getFloat("pretEconomy"),
+							bd.rs.getFloat("Discount_1"),
+							bd.rs.getFloat("Discount_2"),
 							startAirport,
 							stopAirport,
 							departureTime,
 							arrivalTime
 							));
-					
-					/* matchedFlights.add(new Cursa(bd.rs.getString("numeCompanie"), bd.rs.getString("codZbor"),
-							bd.rs.getString("aeroportPornire"), bd.rs.getString("aeroportSosire"),
-							bd.rs.getString("orasPornire"), bd.rs.getString("orasSosire"),
-							LocalDateTime.parse("" + bd.rs.getDate("dataPornire") + " " + bd.rs.getTime("dataPornire"),
-									formatter),
-							LocalDateTime.parse("" + bd.rs.getDate("dataSosire") + " " + bd.rs.getTime("dataSosire"),
-									formatter),
-							bd.rs.getInt("locuriEconomy"), bd.rs.getInt("locuriBusiness"),
-							bd.rs.getFloat("pretEconomy"), bd.rs.getFloat("pretBusiness"), bd.rs.getFloat("discount")));
-							*/
 					++i;
 				}
 
@@ -1346,7 +1372,6 @@ public class UserFrame_test extends JFrame {
 
 				@Override
 				public void focusLost(FocusEvent e) {
-					System.out.println(ftxtTelefon.getText());
 					if (flagFocus && ftxtTelefon.getText().isBlank()) {
 						lblTelefonWarning.setIcon(new ImageIcon(UserFrame.class.getResource("/icons/warning.png")));
 						lblTelefonWarning.setToolTipText("Camp obligatoriu!");
@@ -1444,37 +1469,52 @@ public class UserFrame_test extends JFrame {
 	}
 
 	/* NOT RELATED TO DATABASE. */
-	public ArrayList<Client> extractPassengers() {
+	public ArrayList<Client> extractPassengers(TipPlata plata, TipClasa clasa) {
 		ArrayList<Client> clients = new ArrayList<Client>();
 		Client client = null;
 		float pret = 0f;
 
+		
 		for (Component cParent : Passengers) {
 			JPanel cChild = (JPanel) ((JPanel) ((Container) cParent).getComponent(1)).getComponent(1);
 			Component[] cGrandChildren = cChild.getComponents();
 			client = null;
+			
+			String email = "", telefon = "";
+			
 			if (cGrandChildren.length == 9) {
-				client = new Client(((JTextField) cGrandChildren[0]).getText(),
+				email = ((JTextField) cGrandChildren[8]).getText();
+				telefon = ((JTextField) cGrandChildren[6]).getText();
+				
+				client = new Client((
+						(JTextField) cGrandChildren[0]).getText(),
 						((JTextField) cGrandChildren[2]).getText(),
 						Integer.parseInt(((JSpinner) cGrandChildren[4]).getValue().toString()),
-						((JTextField) cGrandChildren[6]).getText(), ((JTextField) cGrandChildren[8]).getText(), 0f);
+						((JTextField) cGrandChildren[6]).getText(), 
+						((JTextField) cGrandChildren[8]).getText(),
+						0f,
+						plata,
+						clasa);
 			} else if (cGrandChildren.length == 5) {
-				client = new Client(((JTextField) cGrandChildren[0]).getText(),
+				client = new Client(
+						((JTextField) cGrandChildren[0]).getText(),
 						((JTextField) cGrandChildren[2]).getText(),
-						Integer.parseInt(((JSpinner) cGrandChildren[4]).getValue().toString()), 0f);
+						Integer.parseInt(((JSpinner) cGrandChildren[4]).getValue().toString()),
+						telefon,
+						email,
+						0f,
+						plata,
+						clasa);
 			}
-			if (cbxRetur.isSelected()) {
-				client.setPretBilet(client.calculaPret(cmbClasa.getSelectedItem().toString(), selectedFlight.get(0),
-						selectedFlight.get(1)));
-			} else {
-				client.setPretBilet(client.calculaPret(cmbClasa.getSelectedItem().toString(), selectedFlight.get(0)));
-			}
-
 			clients.add(client);
-
 		}
-		System.out.println(clients.size());
-		return clients;
+		
+		for (Client client_ : clients) {
+			client_.setPretBilet(totalPrice/clients.size());
+		}
+		
+		return clients.size() == 0 ? null : clients;
+		
 	}
 
 	/* NOT RELATED TO DATABASE. */
@@ -1506,7 +1546,7 @@ public class UserFrame_test extends JFrame {
 		setTitle("Aladdin");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(UserFrame.class.getResource("/icons/icon.png")));
 		setVisible(true);
-		setBounds(100, 100, 900, 540);
+		setBounds(100, 100, 1259, 540);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		CardLayout pages = new CardLayout();
@@ -1773,6 +1813,7 @@ public class UserFrame_test extends JFrame {
 		JButton btnInapoiDest = new JButton("Inapoi");
 		btnInapoiDest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				totalPrices.clear();
 				pnlOptions.removeAll();
 				pnlOptions.revalidate();
 				pnlOptions.repaint();
@@ -1830,8 +1871,8 @@ public class UserFrame_test extends JFrame {
 						pnlPayFields.repaint();
 						debitCardPayment();
 						flagDebitCard = true;
-					} catch (ParseException e1) {
-						e1.printStackTrace();
+					} catch (ParseException parseException) {
+						parseException.printStackTrace();
 					}
 				}
 			}
@@ -1897,9 +1938,11 @@ public class UserFrame_test extends JFrame {
 		Component rigidArea_1 = Box.createRigidArea(new Dimension(5, 10));
 		pnlUserDataButtons.add(rigidArea_1);
 		btnFinalizare.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				clienti = extractPassengers();
+			
+			public void actionPerformed(ActionEvent e) {	
 				TipPlata plata = null;
+				TipClasa clasa = TipClasa.valueOf(cmbClasa.getSelectedItem().toString());
+				
 				switch (getSelectedButtonText(rdButtons)) {
 				case "Card":
 					plata = TipPlata.Card;
@@ -1911,9 +1954,41 @@ public class UserFrame_test extends JFrame {
 					plata = TipPlata.Cash;
 					break;
 				}
-				for (Client c : clienti) {
-					c.setPlata(plata);
+				
+				clienti = extractPassengers(plata, clasa);
+				
+				
+				if(clienti == null) {
+					return;
 				}
+				else {
+					
+					for (Client client : clienti) {
+						for (int i = 0; i < selectedFlight.size(); i++) {
+							try {
+								bd.sendUpdate("INSERT INTO Clienti (nume, prenume, email, telefon, varsta, optiunePlata) "
+										+ "VALUES("
+										+ "'" + client.getNume()
+										+ "','" + client.getPrenume()
+										+ "','" + client.getEmail()
+										+ "','" + client.getTelefon()
+										+ "','" + client.getVarsta()
+										+ "','" + client.getPlata() + "')");
+								
+								bd.sendUpdate("INSERT INTO Rezervari (codZbor, clasa, pretBilet) "
+										+ "VALUES("
+										+ "'" + selectedFlight.get(0).getCodZbor()
+										+ "','" + client.getClasa()
+										+ "','" + client.getPretBilet() + "')");
+							} catch (SQLException sqlException) {
+								sqlException.printStackTrace();
+								return;
+							}
+						}
+					}
+				}
+					
+				JOptionPane.showMessageDialog(pnlMain, "Rezervarea a fost efectuata cu succes!", "Succes!", JOptionPane.INFORMATION_MESSAGE);
 				// JavaMailUtil.sendMail(clienti.get(0).getEmail().toString());
 			}
 		});

@@ -13,10 +13,14 @@ import java.awt.Cursor;
 
 import java.awt.Toolkit;
 import java.io.IOException;
+import java.text.ParseException;
+
 import javax.swing.JLabel;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -45,6 +49,20 @@ public class MainFrame extends JFrame {
 
 	private JButton createButton(String btnText, int fontSize, int x, int y, int w, int h, Color color) {
 		JButton btnCustom = new JButton(btnText);
+		btnCustom.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				UserFrame_test frame;
+				try {
+					frame = new UserFrame_test();
+					frame.setLocationRelativeTo(null);
+					frame.setVisible(true);
+					dispose();
+				} catch (ParseException parseException) {
+					parseException.printStackTrace();
+				}
+			}
+		});
 		btnCustom.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, fontSize));
 		btnCustom.setBounds(x, y, w, h);
 		btnCustom.setAlignmentX(CENTER_ALIGNMENT);
