@@ -144,5 +144,4 @@ public class Zbor {
 	public void setDiscountLastMinute(float discountLastMinute) {
 		this.discountLastMinute = discountLastMinute;
 	}
-	
 }

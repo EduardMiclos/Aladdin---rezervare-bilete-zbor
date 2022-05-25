@@ -56,9 +56,9 @@ public class PAFrame extends JFrame {
 	private void readFlights(String location)
 	{
 		try {
-			String query = "SELECT zboruri.codZbor, zboruri.ziOperare, zboruri.businessRamase,"
+			String query = "SELECT DISTINCT zboruri.codZbor, zboruri.ziOperare, zboruri.businessRamase,"
 					+ "zboruri.economyRamase, curse.CompanieAeriana, trasee.Locatii FROM zboruri,"
-					+ "curse, trasee WHERE zboruri.codCursa=curse.CodCursa AND trasee.locatii"
+					+ "curse, trasee WHERE zboruri.codCursa=curse.CodCursa AND curse.Traseu=trasee.idTraseu AND trasee.locatii"
 					+ " LIKE \'%" + location +"%'";
 			
 			dbConn.sendQuery(query);

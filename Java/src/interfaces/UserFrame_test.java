@@ -1961,10 +1961,22 @@ public class UserFrame_test extends JFrame {
 				if(clienti == null) {
 					return;
 				}
-				else {
-					
+				else {				
 					for (Client client : clienti) {
 						for (int i = 0; i < selectedFlight.size(); i++) {
+							String targetSeatClass = "";
+							
+							int seats = 0;
+							if (client.getClasa() == TipClasa.Business) {
+								seats = selectedFlight.get(i).getBusinessRamase() - 1;
+								targetSeatClass = "businessRamase";
+							}
+							else
+							{
+								seats = selectedFlight.get(i).getEconomyRamase() - 1;
+								targetSeatClass = "economyRamase";
+							}
+							
 							try {
 								bd.sendUpdate("INSERT INTO Clienti (nume, prenume, email, telefon, varsta, optiunePlata) "
 										+ "VALUES("
@@ -1977,9 +1989,11 @@ public class UserFrame_test extends JFrame {
 								
 								bd.sendUpdate("INSERT INTO Rezervari (codZbor, clasa, pretBilet) "
 										+ "VALUES("
-										+ "'" + selectedFlight.get(0).getCodZbor()
+										+ "'" + selectedFlight.get(i).getCodZbor()
 										+ "','" + client.getClasa()
 										+ "','" + client.getPretBilet() + "')");
+								
+								bd.sendUpdate("UPDATE zboruri SET " + targetSeatClass + " = " + seats + " WHERE codZbor = '" + selectedFlight.get(i).getCodZbor() + "'");
 							} catch (SQLException sqlException) {
 								sqlException.printStackTrace();
 								return;
