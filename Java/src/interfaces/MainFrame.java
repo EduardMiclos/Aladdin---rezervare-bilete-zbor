@@ -52,9 +52,9 @@ public class MainFrame extends JFrame {
 		btnCustom.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				UserFrame_test frame;
+				UserFrame frame;
 				try {
-					frame = new UserFrame_test();
+					frame = new UserFrame();
 					frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
 					dispose();
