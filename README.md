@@ -26,3 +26,7 @@ f.        daca utilizatorul selecteaza un zbor, ii vor fi prezentate toate detal
 g.       dupa ce se face validarea datelor de intrare si se verifica faptul ca banii au intreat in cont, sistemul va emite un e-mail catre utilizator cu datele rezervarii si in rezervarile specific acelui zbor si zi va opera retinerea locurilor rezervate;
 
 h.      in acelasi timp, sistemul poate fi consultat si de personalul de la aeroporturi, in aceasta situatie pentru detaliile de plata acceptandu-se si optiunea de plata cash.
+
+<p align="center">
+  <img src="https://i.imgur.com/WaPZmeO.png" />
+</p>
