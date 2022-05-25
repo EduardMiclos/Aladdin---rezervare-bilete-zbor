@@ -216,7 +216,6 @@ public class PAFrameExtension_ViewFlight extends JFrame {
 					return;
 				}
 				
-				
 				int businessSeats, economySeats;
 				
 				try {

@@ -1,5 +1,6 @@
 package classes;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -11,6 +12,8 @@ public class Cursa {
 	private String codTraseu;
 	private Vector<NodTraseu> trasee;
 	private Vector<ZiOperare> zileOperare;
+	
+	private String numeCompanie;
 	
 	private float discountDusIntors;
 	private float discountLastMinute;
@@ -30,6 +33,19 @@ public class Cursa {
 		this.discountLastMinute = discountLastMinute;
 	}
 
+	public String getNumeCompanie() {
+		return this.numeCompanie;
+	}
+	
+	public void setNumeCompanie(DatabaseConnection bd) {
+		try {
+			bd.sendQuery("SELECT CompanieAeriana FROM CURSE where codCursa='" + codCursa + "'");
+			bd.rs.first();
+		} catch (SQLException sqlException) {
+			sqlException.printStackTrace();
+		}
+	}
+	
 	public String getCodCursa() {
 		return codCursa;
 	}
